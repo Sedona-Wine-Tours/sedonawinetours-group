@@ -1,0 +1,4 @@
+build/__pycache__/
+build/*.png
+build/shot*.js
+build/patch_content.py
