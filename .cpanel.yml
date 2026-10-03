@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/CPANEL_USERNAME/public_html/
+    - export DEPLOYPATH=$HOME/public_html/sedonawinetours.group/
     - /bin/cp -R site/. $DEPLOYPATH
