@@ -9,7 +9,7 @@ def tel(s, t=None, n=None):
     return s.replace("{TEL}", t or PHONE_MAIN_TEL).replace("{NUM}", n or PHONE_MAIN)
 
 FH = "https://fareharbor.com/embeds/book/winetoursofsedona/items/{}/?full-items=yes"
-CONFIRM = '<span class="badge confirm">Confirm</span>'
+CONFIRM = ''  # site is live: internal confirm badges disabled
 WTOS_BOOK = "https://winetoursofsedona.com/book-now-tour-menu/"
 SWA_BOOK = "https://www.sedonawineadventures.com/reservations/"
 SIP_BOOK = "https://sipsedona.com/"
@@ -240,7 +240,6 @@ HOME_BODY = f'''
     <h2>The Sedona Cellar Experience</h2>
     <p class="lede">Some evenings you don't want to go anywhere. Our guide brings a curated flight of Arizona wines to your Sedona vacation rental or resort suite and walks your group through them — the stories, the soils, the winemakers — while the red rocks do the lighting.</p>
     <p>Perfect for a first night in town, a rehearsal-dinner wind-down, a girls' weekend that doesn't want to get back in a van, or a corporate group who'd rather taste in the boardroom than the tasting room.</p>
-    <p>{CONFIRM} <em>Price, duration, minimum group size and exactly what's poured to be confirmed from FareHarbor item 752593 before launch.</em></p>
     <p><a class="btn btn-primary" href="{FH.format(752593)}" rel="noopener">Book The Sedona Cellar Experience</a> <a class="btn btn-ghost" href="tel:{PHONE_WTOS_TEL}">Ask us: {PHONE_WTOS}</a></p>
   </div>
 </div></section>
@@ -282,14 +281,8 @@ HOME_BODY = f'''
   <p style="margin-top:1.6rem"><a class="btn btn-ghost" href="sedona-wineries-and-vineyards.html">Our guide to every winery and vineyard near Sedona</a></p>
 </div></section>
 
-<section><div class="wrap">
-  <div class="section-head"><div><span class="eyebrow">Guest reviews</span><h2>What our guests say</h2></div><p>Wine Tours of Sedona has been voted Readers' Choice Best of the Best two years running and holds TripAdvisor's Travelers' Choice award. Find us on TripAdvisor, Yelp and Google.</p></div>
-  <div class="reviews">
-    <div class="review"><div class="stars" aria-label="Five stars">★★★★★</div><blockquote>“He was so fun, knowledgeable, and made the entire experience unforgettable!”</blockquote><cite>Guest review · Wine Tours of Sedona</cite></div>
-    <div class="review"><div class="stars" aria-label="Five stars">★★★★★</div><blockquote>“Felt like we just added another friend from home to our tour!”</blockquote><cite>Guest review · Wine Tours of Sedona</cite></div>
-    <div class="review"><div class="stars" aria-label="Five stars">★★★★★</div><blockquote>“Juan was an incredible tour guide. Was able to answer every question.”</blockquote><cite>Guest review · Wine Tours of Sedona, guide Juan Manuel</cite></div>
-  </div>
-</div></section>
+<!--REVIEWS-->
+<!--SOCIAL-->
 
 <section id="faq" style="background:var(--ground-2)"><div class="wrap">
   <div class="section-head"><div><span class="eyebrow">Questions &amp; answers</span><h2>Planning a Sedona wine tour? Start here.</h2></div></div>
@@ -358,7 +351,7 @@ WTOS_BODY = f'''
 </div></section>
 
 <section><div class="wrap">
-  <div class="section-head"><div><span class="eyebrow">Most popular</span><h2>Our three most-booked Wine Tours of Sedona tours</h2></div><p>{CONFIRM} Retail per adult; the 6+ price shown is the 20% group rate before the 18% group gratuity. We refresh this list monthly from FareHarbor.</p></div>
+  <div class="section-head"><div><span class="eyebrow">Most popular</span><h2>Our three most-booked Wine Tours of Sedona tours</h2></div><p>Retail per adult; the 6+ price shown is the 20% group rate before the 18% group gratuity. We refresh this list monthly from FareHarbor.</p></div>
   <div class="tours">{"".join(tour_card(t) for t in WTOS_TOP)}</div>
   <p style="margin-top:1.5rem"><a class="btn btn-ghost" href="index.html#packages">See all Wine Tours of Sedona packages and prices</a></p>
 </div></section>
@@ -375,6 +368,8 @@ WTOS_BODY = f'''
   </div>
 </div></section>
 
+<!--REVIEWS-->
+<!--SOCIAL-->
 <section><div class="wrap">
   <div class="section-head"><div><span class="eyebrow">Questions</span><h2>Wine Tours of Sedona, answered</h2></div></div>
   {faq_html(WTOS_FAQ)}
@@ -418,7 +413,7 @@ SIP_BODY = f'''
 </div></section>
 
 <section><div class="wrap">
-  <div class="section-head"><div><span class="eyebrow">Most popular</span><h2>Our three most-booked SIP Sedona tours</h2></div><p>{CONFIRM} Prices are per person, 21+, plus an 18% gratuity. Tastings and food are purchased at each stop, so the price you see is the price of the ride and the guide.</p></div>
+  <div class="section-head"><div><span class="eyebrow">Most popular</span><h2>Our three most-booked SIP Sedona tours</h2></div><p>Prices are per person, 21+, plus an 18% gratuity. Tastings and food are purchased at each stop, so the price you see is the price of the ride and the guide.</p></div>
   <div class="tours">{"".join(tour_card(t) for t in SIP_TOP)}</div>
   <p style="margin-top:1.5rem;color:var(--ink-2)">Also on the schedule: the <strong>8-Hour SIP All Day Experience</strong>, $240 — seven stops from The Art of Wine and Winery 1912 through Javelina Leap, Cove Mesa, Alcantara and Cellar 433 to Arizona Stronghold. <a href="https://sipsedona.com/tours/8-hour-sip-all-day-experience/" rel="noopener">Details →</a></p>
 </div></section>
@@ -456,6 +451,8 @@ SIP_BODY = f'''
   </div>
 </div></section>
 
+<!--REVIEWS-->
+<!--SOCIAL-->
 <section style="background:var(--ground-2)"><div class="wrap">
   <div class="section-head"><div><span class="eyebrow">Questions</span><h2>SIP Sedona, answered</h2></div></div>
   {faq_html(SIP_FAQ)}
@@ -498,7 +495,7 @@ SWA_BODY = f'''
 </div></section>
 
 <section><div class="wrap">
-  <div class="section-head"><div><span class="eyebrow">Most popular</span><h2>Our three most-booked Sedona Wine Adventures</h2></div><p>{CONFIRM} Prices are per adult plus an 18% gratuity; tastings and meals are paid directly at each stop.</p></div>
+  <div class="section-head"><div><span class="eyebrow">Most popular</span><h2>Our three most-booked Sedona Wine Adventures</h2></div><p>Prices are per adult plus an 18% gratuity; tastings and meals are paid directly at each stop.</p></div>
   <div class="tours">{"".join(tour_card(t) for t in SWA_TOP)}</div>
   <p style="margin-top:1.5rem;color:var(--ink-2)">Also popular: <strong>Verde Valley Spirits</strong> (5 hrs, $250) — Spirits &amp; Spice, Redwall Distillery, the Southwest Wine Center and Old Town Cottonwood's new distilleries — and <strong>A Sedona Quickie</strong> (90 min, $95) at The Art of Wine. <a href="https://www.sedonawineadventures.com/adventures/" rel="noopener">All adventures →</a></p>
 </div></section>
@@ -513,6 +510,8 @@ SWA_BODY = f'''
   </div>
 </div></section>
 
+<!--REVIEWS-->
+<!--SOCIAL-->
 <section><div class="wrap">
   <div class="section-head"><div><span class="eyebrow">Questions</span><h2>Sedona Wine Adventures, answered</h2></div></div>
   {faq_html(SWA_FAQ)}
@@ -736,7 +735,7 @@ WINERIES_BODY = f"""
   <div class="facts">
     <div><span>Vineyards</span><strong class="num">8 estate locations</strong></div>
     <div><span>Tasting rooms</span><strong class="num">About 20</strong></div>
-    <div><span>Breweries</span><strong class="num">7 in the valley</strong></div>
+    <div><span>Breweries</span><strong class="num">7 in the Verde Valley</strong></div>
     <div><span>AVA since</span><strong>December 2021</strong></div>
   </div>
 </div></section>
@@ -782,6 +781,21 @@ WINERIES_BODY = f"""
   </div>
 </div></section>
 
+<section><div class="wrap">
+  <div class="section-head"><div><span class="eyebrow">Flagstaff · 30 miles north, 7,000 feet up</span><h2>The Flagstaff breweries we visit</h2></div><p>Flagstaff's eight breweries are the stops on the city's official Brewery Trail, and the reason our micro-brewery tours don't stop at the valley line. It's a mountain town with a college, a railroad and a serious beer scene — cooler by fifteen degrees, which is exactly what you want in July. We run a dedicated historic downtown Flagstaff brewery tour, and the Arizona Hopful tour strings every brewery from Camp Verde to Flagstaff into one day.</p></div>
+  <div class="winery-grid">
+    {winery("Mother Road Brewing Company", "Southside &amp; downtown Flagstaff", "Flagstaff's best-known brewery, named for Route 66 and famous for Tower Station IPA. Two spots: the original Butler Avenue brewery and a downtown taproom.")}
+    {winery("Historic Brewing Company — Barrel + Bottle House", "Downtown Flagstaff", "Historic's downtown tasting room, with a long list that includes their cult Piehole Porter, a cherry-vanilla porter people drive up for.")}
+    {winery("Dark Sky Brewing Company", "Downtown Flagstaff", "Small-batch and always changing — the board can turn over weekly. Named for Flagstaff's status as the world's first International Dark Sky City.")}
+    {winery("Beaver Street Brewery", "Southside Flagstaff", "The elder statesman, open since 1994, with wood-fired pizza and a family-friendly brewpub feel. A reliable first or last stop.")}
+    {winery("Lumberyard Brewing Company", "Southside Flagstaff", "Beaver Street's sister brewery inside a restored 1900s lumber mill building — bigger room, bigger patio, a full menu, and a big Flagstaff IPA.")}
+    {winery("Flagstaff Brewing Company", "Historic downtown, on Route 66", "A downtown fixture since 1994 with a lively patio and a deep whiskey list to go with the house beers.")}
+    {winery("Wanderlust Brewing Company", "East Flagstaff", "The beer nerd's favorite: Belgian-inspired and barrel-aged ales in a no-frills industrial taproom. Try the 928 Local farmhouse ale.")}
+    {winery("Grand Canyon Brewing + Distillery", "Flagstaff taproom (brewed in Williams)", "Northern Arizona's largest brewery, with a Flagstaff taproom pouring the full line plus their own spirits. Sunset Amber is the crowd-pleaser.")}
+  </div>
+  <p style="margin-top:1.2rem"><a class="btn btn-primary" href="https://winetoursofsedona.com/scenic-micro-brewery-tours/" rel="noopener">See our micro-brewery tours</a> <a class="btn btn-ghost" href="index.html#packages">All tour packages</a></p>
+</div></section>
+
 <section style="background:var(--ground-2)"><div class="wrap">
   <div class="section-head"><div><span class="eyebrow">In Sedona</span><h2>Tasting rooms you can walk to</h2></div><p>No vineyards in town, but five rooms pouring Arizona wine — the basis of our Sedona Arizona Wine Tasting Experience and the Sedona Quickie.</p></div>
   <div class="winery-grid">
@@ -801,7 +815,7 @@ WINERIES_BODY = f"""
 WINERIES_PAGE = dict(
   slug="sedona-wineries-and-vineyards.html",
   title="Wineries in Sedona &amp; Verde Valley Vineyards | Insider's Guide",
-  description="Every winery, vineyard and tasting room near Sedona, AZ — Alcantara, DA Ranch, Page Springs, Old Town Cottonwood, Jerome and Clarkdale — with hours, specialties and which wine tour visits each. From Sedona's guides since 2004.",
+  description="Every winery, vineyard, tasting room and brewery near Sedona, AZ — Alcantara, DA Ranch, Page Springs, Old Town Cottonwood, Jerome, Clarkdale and Flagstaff's eight breweries — with specialties and which tour visits each. From Sedona's guides since 2004.",
   body=WINERIES_BODY,
   schema=[breadcrumbs([("Home","index.html"),("Wineries & vineyards near Sedona","sedona-wineries-and-vineyards.html")]), faq_schema(WINERY_FAQ)],
 )

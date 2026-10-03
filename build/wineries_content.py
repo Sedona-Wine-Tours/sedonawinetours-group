@@ -24,7 +24,7 @@ WINERIES_BODY = f"""
   <div class="facts">
     <div><span>Vineyards</span><strong class="num">8 estate locations</strong></div>
     <div><span>Tasting rooms</span><strong class="num">About 20</strong></div>
-    <div><span>Breweries</span><strong class="num">7 in the valley</strong></div>
+    <div><span>Breweries</span><strong class="num">7 in the Verde Valley</strong></div>
     <div><span>AVA since</span><strong>December 2021</strong></div>
   </div>
 </div></section>
@@ -70,6 +70,21 @@ WINERIES_BODY = f"""
   </div>
 </div></section>
 
+<section><div class="wrap">
+  <div class="section-head"><div><span class="eyebrow">Flagstaff · 30 miles north, 7,000 feet up</span><h2>The Flagstaff breweries we visit</h2></div><p>Flagstaff's eight breweries are the stops on the city's official Brewery Trail, and the reason our micro-brewery tours don't stop at the valley line. It's a mountain town with a college, a railroad and a serious beer scene — cooler by fifteen degrees, which is exactly what you want in July. We run a dedicated historic downtown Flagstaff brewery tour, and the Arizona Hopful tour strings every brewery from Camp Verde to Flagstaff into one day.</p></div>
+  <div class="winery-grid">
+    {winery("Mother Road Brewing Company", "Southside &amp; downtown Flagstaff", "Flagstaff's best-known brewery, named for Route 66 and famous for Tower Station IPA. Two spots: the original Butler Avenue brewery and a downtown taproom.")}
+    {winery("Historic Brewing Company — Barrel + Bottle House", "Downtown Flagstaff", "Historic's downtown tasting room, with a long list that includes their cult Piehole Porter, a cherry-vanilla porter people drive up for.")}
+    {winery("Dark Sky Brewing Company", "Downtown Flagstaff", "Small-batch and always changing — the board can turn over weekly. Named for Flagstaff's status as the world's first International Dark Sky City.")}
+    {winery("Beaver Street Brewery", "Southside Flagstaff", "The elder statesman, open since 1994, with wood-fired pizza and a family-friendly brewpub feel. A reliable first or last stop.")}
+    {winery("Lumberyard Brewing Company", "Southside Flagstaff", "Beaver Street's sister brewery inside a restored 1900s lumber mill building — bigger room, bigger patio, a full menu, and a big Flagstaff IPA.")}
+    {winery("Flagstaff Brewing Company", "Historic downtown, on Route 66", "A downtown fixture since 1994 with a lively patio and a deep whiskey list to go with the house beers.")}
+    {winery("Wanderlust Brewing Company", "East Flagstaff", "The beer nerd's favorite: Belgian-inspired and barrel-aged ales in a no-frills industrial taproom. Try the 928 Local farmhouse ale.")}
+    {winery("Grand Canyon Brewing + Distillery", "Flagstaff taproom (brewed in Williams)", "Northern Arizona's largest brewery, with a Flagstaff taproom pouring the full line plus their own spirits. Sunset Amber is the crowd-pleaser.")}
+  </div>
+  <p style="margin-top:1.2rem"><a class="btn btn-primary" href="https://winetoursofsedona.com/scenic-micro-brewery-tours/" rel="noopener">See our micro-brewery tours</a> <a class="btn btn-ghost" href="index.html#packages">All tour packages</a></p>
+</div></section>
+
 <section style="background:var(--ground-2)"><div class="wrap">
   <div class="section-head"><div><span class="eyebrow">In Sedona</span><h2>Tasting rooms you can walk to</h2></div><p>No vineyards in town, but five rooms pouring Arizona wine — the basis of our Sedona Arizona Wine Tasting Experience and the Sedona Quickie.</p></div>
   <div class="winery-grid">
@@ -89,7 +104,7 @@ WINERIES_BODY = f"""
 WINERIES_PAGE = dict(
   slug="sedona-wineries-and-vineyards.html",
   title="Wineries in Sedona &amp; Verde Valley Vineyards | Insider's Guide",
-  description="Every winery, vineyard and tasting room near Sedona, AZ — Alcantara, DA Ranch, Page Springs, Old Town Cottonwood, Jerome and Clarkdale — with hours, specialties and which wine tour visits each. From Sedona's guides since 2004.",
+  description="Every winery, vineyard, tasting room and brewery near Sedona, AZ — Alcantara, DA Ranch, Page Springs, Old Town Cottonwood, Jerome, Clarkdale and Flagstaff's eight breweries — with specialties and which tour visits each. From Sedona's guides since 2004.",
   body=WINERIES_BODY,
   schema=[breadcrumbs([("Home","index.html"),("Wineries & vineyards near Sedona","sedona-wineries-and-vineyards.html")]), faq_schema(WINERY_FAQ)],
 )

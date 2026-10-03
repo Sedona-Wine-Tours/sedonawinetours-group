@@ -14,13 +14,13 @@ ADDRESS = "2020 Contractors Road, Suite 3, Sedona, AZ 86336"
 
 FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Figtree:wght@400;500;600;700&display=swap">'
 
-CSS = (HERE / "styles.css").read_text()
+CSS = (HERE / "styles.css").read_text() + __import__("reviews").REVIEWS_CSS + __import__("social").SOCIAL_CSS
 
 NAV = [
     ("index.html", "Home"),
     ("wine-tours-of-sedona.html", "Wine Tours of Sedona"),
     ("sip-sedona.html", "SIP Sedona"),
-    ("sedona-wine-adventures.html", "Wine Adventures"),
+    ("sedona-wine-adventures.html", "Sedona Wine Adventures"),
     ("groups-corporate-weddings.html", "Groups &amp; Weddings"),
     ("sedona-wineries-and-vineyards.html", "Wineries"),
     ("pricing-and-policies.html", "Pricing"),
@@ -35,7 +35,7 @@ def clean(slug):
 def cleanify(html):
     """Rewrite internal .html links to extensionless URLs (served by .htaccess)."""
     html = re.sub(r'href="index\.html(#[^"]*)?"', lambda m: f'href="/{m.group(1) or ""}"', html)
-    for href, _ in NAV + [("pricing-and-policies.html", ""), ("sedona-wineries-and-vineyards.html", ""), ("404.html", ""), ("thank-you.html", ""), ("blog/index.html", "")]:
+    for href, _ in NAV + [("pricing-and-policies.html", ""), ("sedona-wineries-and-vineyards.html", ""), ("reviews.html", ""), ("404.html", ""), ("thank-you.html", ""), ("blog/index.html", "")]:
         html = re.sub(r'href="' + re.escape(href) + r'(#[^"]*)?"', lambda m, h=href: f'href="{clean(h)}{m.group(1) or ""}"', html)
     return html
 
@@ -43,7 +43,8 @@ def header(current):
     links = ""
     for href, label in NAV:
         cur = ' aria-current="page"' if href == current else ""
-        links += f'<a href="{href}"{cur}>{label}</a>'
+        cls = ' class="nav-home"' if href == "index.html" else ""
+        links += f'<a href="{href}"{cur}{cls}>{label}</a>'
     return f'''<header class="site-header"><div class="wrap">
   <a class="wordmark" href="index.html" aria-label="Sedona Wine Tours home"><img class="mark" src="/images/swt-emblem-sm.webp" alt="" width="40" height="40"><span>Sedona Wine Tours<small>Sip. Savor. Explore. · Est. 2004</small></span></a>
   <button class="menu-btn" aria-expanded="false" aria-controls="primary-nav" onclick="var n=document.getElementById('primary-nav');var o=n.classList.toggle('open');this.setAttribute('aria-expanded',o)">Menu</button>
@@ -68,6 +69,7 @@ FOOTER = f'''<footer><div class="wrap">
       <li><a href="index.html#packages">Tour packages</a></li>
       <li><a href="index.html#cellar">In-home wine tasting</a></li>
       <li><a href="sedona-wineries-and-vineyards.html">Wineries &amp; vineyards near Sedona</a></li>
+      <li><a href="reviews.html">Guest reviews, all divisions</a></li>
       <li><a href="index.html#faq">Questions &amp; answers</a></li>
     </ul></div>
     <div><h4>Direct lines</h4><ul>
@@ -134,7 +136,7 @@ ORG = {
     {"@type": "Organization", "name": "SIP Sedona", "url": "https://sipsedona.com", "telephone": PHONE_SIP_TEL},
     {"@type": "Organization", "name": "Sedona Wine Adventures", "url": "https://www.sedonawineadventures.com", "telephone": PHONE_SWA_TEL},
   ],
-  "sameAs": ["https://www.winetoursofsedona.com", "https://sipsedona.com", "https://www.sedonawineadventures.com"],
+  "sameAs": ["https://www.winetoursofsedona.com", "https://sipsedona.com", "https://www.sedonawineadventures.com"] + __import__("social").same_as(),
 }
 
 def breadcrumbs(items):
@@ -172,7 +174,7 @@ def specials_html():
         return ""
     cards = ""
     for it in sp["items"]:
-        badge = '<span class="badge confirm">Confirm</span> ' if it.get("confirm") else ""
+        badge = ""  # confirm badges disabled now that the site is live
         cards += f'<article class="special brand-{it.get("division","wtos")}"><h3>{it["title"]}</h3><p>{it["text"]}</p><p>{badge}<a class="btn btn-primary" href="{it["url"]}" rel="noopener">{it["cta"]}</a></p></article>'
     return f'<section id="specials" class="tight specials-wrap"><div class="wrap"><div class="section-head"><div><span class="eyebrow">Specials &amp; what\'s new</span><h2>{sp["heading"]}</h2></div><p>Updated {sp["updated"]}. New offers land here every week.</p></div><div class="specials">{cards}</div></div></section>'
 
@@ -187,6 +189,17 @@ def build():
     pages = [HOME, WTOS, SIP, SWA, GROUPS, PRICING, WINERIES_PAGE]
     from chooser import chooser_html
     HOME["body"] = HOME["body"].replace("<!--CHOOSER-->", chooser_html()).replace("<!--SPECIALS-->", specials_html())
+    from reviews import load_reviews, reviews_home_html, reviews_division_html, reviews_page_body, reviews_schema
+    from social import social_home_html, social_division_html
+    reviews = load_reviews()
+    HOME["body"] = HOME["body"].replace("<!--REVIEWS-->", reviews_home_html(reviews)).replace("<!--SOCIAL-->", social_home_html())
+    for pg, key in ((WTOS, "wtos"), (SIP, "sip"), (SWA, "swa")):
+        pg["body"] = pg["body"].replace("<!--REVIEWS-->", reviews_division_html(reviews, key)).replace("<!--SOCIAL-->", social_division_html(key))
+        pg["schema"] = list(pg["schema"]) + reviews_schema(reviews, key, 5)
+    REVIEWS_PAGE = dict(slug="reviews.html", title="Sedona Wine Tour Reviews | Wine Tours of Sedona, SIP Sedona &amp; Sedona Wine Adventures",
+        description="Real Google reviews of our three Sedona wine tour divisions, labeled by division and refreshed weekly: Wine Tours of Sedona (4.9★, 550+), SIP Sedona (5.0★) and Sedona Wine Adventures.",
+        body=reviews_page_body(reviews), schema=[breadcrumbs([("Home", "index.html"), ("Guest reviews", "reviews.html")])] + reviews_schema(reviews, None, 10))
+    pages.append(REVIEWS_PAGE)
     for p in pages + [THANKS]:
         html = cleanify(page(**p).replace('src="images/', 'src="/images/'))
         (OUT / p["slug"]).write_text(html)
