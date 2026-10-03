@@ -1,0 +1,40 @@
+# sedonawinetours.group — Apache config for GoDaddy cPanel hosting
+Options -Indexes -MultiViews
+RewriteEngine On
+
+# Force HTTPS + www (one hop)
+RewriteCond %{HTTPS} off [OR]
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteRule ^ https://www.sedonawinetours.group%{REQUEST_URI} [R=301,L,NE]
+
+# /page.html -> /page (301) so only one URL per page is indexed
+RewriteCond %{THE_REQUEST} \s/([^.?\s]+)\.html[\s?] [NC]
+RewriteRule ^ /%1 [R=301,L,NE]
+RewriteRule ^index$ / [R=301,L]
+
+# Serve /page from page.html
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^([^.]+)$ $1.html [L]
+
+ErrorDocument 404 /404.html
+
+# Compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+</IfModule>
+
+# Caching
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType text/html "access plus 1 hour"
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
