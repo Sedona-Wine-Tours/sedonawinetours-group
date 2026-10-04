@@ -57,15 +57,16 @@ def header(current):
   <div class="masthead"><div class="wrap">
     <div class="brand">
       <a class="brand-name" href="index.html">Sedona Wine Tours</a>
-      <span class="brand-tag">Sip. Savor. Explore. · Since 2004</span>
-      <a class="brand-phone" href="tel:{PHONE_MAIN_TEL}">Call or text {PHONE_MAIN}</a>
+      <span class="brand-divs"><a href="wine-tours-of-sedona.html">Wine Tours of Sedona</a>, <a href="sip-sedona.html">SIP Sedona</a>, <a href="sedona-wine-adventures.html">Sedona Wine Adventures</a></span>
+      <span class="brand-tag">Sip. Savor. Explore.</span>
+      <span class="brand-since">Since 2004</span>
     </div>
-    <a class="emblem-link" href="index.html" aria-label="Sedona Wine Tours home"><img class="emblem-img" src="/images/swt-emblem-md.webp" alt="Sedona Wine Tours — Wine Tours of Sedona, SIP Sedona and Sedona Wine Adventures" width="200" height="200" fetchpriority="high"></a>
-    <a class="promo" href="{PROMO["url"]}" rel="noopener">
-      <span class="promo-eyebrow">{PROMO["eyebrow"]}</span>
-      <strong>{PROMO["title"]}</strong>
-      <span class="promo-text">{PROMO["text"]}</span>
-      <span class="promo-cta">{PROMO["cta"]} →</span>
+    <a class="emblem-link" href="index.html" aria-label="Sedona Wine Tours home"><img class="emblem-img" src="/images/swt-emblem-md.webp" alt="Sedona Wine Tours — Wine Tours of Sedona, SIP Sedona and Sedona Wine Adventures" width="220" height="220" fetchpriority="high"></a>
+    <a class="promo" href="{PROMO["url"]}" rel="noopener" aria-label="20% off every SIP Sedona tour when you join an existing reservation — see live availability">
+      <span class="promo-tag">SIP Sedona deal</span>
+      <span class="promo-big">20<small>%</small> OFF</span>
+      <span class="promo-line">every SIP Sedona tour when you join an existing reservation</span>
+      <span class="promo-cta">See today's open seats →</span>
     </a>
   </div></div>
 </header>'''
