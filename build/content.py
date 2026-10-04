@@ -72,15 +72,15 @@ SIP_TOP = [
   dict(name="3-Hour Tasting Adventure", duration="3 hours", meta="Small group · Pay-as-you-go", price="$90", price_num="90", price_note="per person + 18% gratuity",
        desc="Sedona wine country without committing a whole day: Oak Creek Vineyard on the Page Springs corridor, then Cove Mesa Vineyard's tasting room in Cornville, where the owners are often pouring.",
        includes=["Local guide, water and pickup within Sedona city limits", "Fixed itinerary — you buy the flights you want at each stop", "Up to 14 guests; make it private for $100 per hour"],
-       url="https://sipsedona.com/tours/3-hour-tasting-adventure/", badge="Best first taste", fit="first-timers, casual dates"),
+       url="https://fareharbor.com/embeds/book/winetoursofsedona/items/644318/calendar/?ref=https%3A%2F%2Fwww.sedonawinetours.group", badge="Best first taste", fit="first-timers, casual dates"),
   dict(name="4-Hour SIP &amp; Savor Tour", duration="4 hours", meta="Small group · Pay-as-you-go", price="$120", price_num="120", price_note="per person + 18% gratuity",
        desc="Three very different pours: Alcantara's riverside estate, bold wines and handmade pasta at Merkin Vineyards &amp; Hilltop Trattoria, and a social finish at Arizona Stronghold, the state's largest winemaker.",
        includes=["Local guide, water and pickup within Sedona city limits", "Fixed itinerary — tastings and food paid at each stop", "Up to 14 guests; make it private for $100 per hour"],
-       url="https://sipsedona.com/tours/4-hour-sip-savor-tour/", badge="Foodie favorite", fit="foodies, small groups"),
+       url="https://fareharbor.com/embeds/book/winetoursofsedona/items/644328/calendar/?ref=https%3A%2F%2Fwww.sedonawinetours.group", badge="Foodie favorite", fit="foodies, small groups"),
   dict(name="5-Hour Wine, Beer &amp; Beyond Experience", duration="5 hours", meta="Small group · Pay-as-you-go", price="$150", price_num="150", price_note="per person + 18% gratuity",
        desc="The wider Verde Valley in one loop: DA Ranch or Alcantara to start, then Chateau Tumbleweed, Rubrix Wines and Vino Di Sedona — wine, beer and a little beyond.",
        includes=["Local guide, water and pickup within Sedona city limits", "Fixed itinerary — tastings paid at each stop", "Up to 14 guests; private for $500 (5 hours × $100)"],
-       url="https://sipsedona.com/", fit="bachelorette parties, mixed groups"),
+       url="https://fareharbor.com/embeds/book/winetoursofsedona/items/644329/calendar/?ref=https%3A%2F%2Fwww.sedonawinetours.group", fit="bachelorette parties, mixed groups"),
 ]
 
 SWA_TOP = [
@@ -140,7 +140,7 @@ HOME_FAQ = [(q, tel(a)) for q, a in HOME_FAQ_RAW]
 HOME_BODY = f'''
 <section class="hero hero-dark"><div class="wrap">
   <div>
-    <span class="eyebrow">Sip. Savor. Explore. · Sedona's most experienced wine tour company, since 2004</span>
+    <span class="eyebrow">Sedona's most experienced wine tour company · since 2004</span>
     <h1>Sedona wine tours, three ways. <em>One family of local guides since 2004.</em></h1>
     <p class="lede">We're the local company behind <strong>Wine Tours of Sedona</strong>, <strong>SIP Sedona</strong> and <strong>Sedona Wine Adventures</strong>. Whether you want an all-inclusive private day, a small-group van to the Verde Valley's best tasting rooms, or a pay-as-you-go adventure that unfolds your way, one of our three divisions was built for exactly how you like to travel. We're not the biggest wine tour company in Sedona. We intend to be the best.</p>
     <div class="actions"><a class="btn btn-primary" href="#chooser">Find the right tour for me</a><a class="btn btn-ghost" href="tel:{PHONE_MAIN_TEL}">Call {PHONE_MAIN}</a></div>
@@ -151,7 +151,7 @@ HOME_BODY = f'''
       <div><strong>Best of the Best</strong>Readers' Choice 2023 &amp; 2024</div>
     </div>
   </div>
-  <div class="emblem"><img src="images/swt-emblem.webp" alt="Sedona Wine Tours emblem: Cathedral Rock at sunset over Verde Valley vineyards, with Wine Tours of Sedona, SIP Sedona and Sedona Wine Adventures" width="900" height="900" fetchpriority="high"></div>
+  <div class="emblem emblem-banner"><img src="images/three-divisions-banner.jpg" alt="Wine Tours of Sedona, SIP Sedona and Sedona Wine Adventures — three divisions of Sedona Wine Tours over the red rocks" width="650" height="360" loading="eager"></div>
 </div></section>
 
 <!--SPECIALS-->

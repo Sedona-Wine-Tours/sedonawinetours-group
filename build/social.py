@@ -17,7 +17,7 @@ SOCIAL = {
                         ("LinkedIn", "https://www.linkedin.com/company/64734706/")]),
     "sip": dict(name="SIP Sedona", ig="sipsedona",
                 links=[("Instagram", "https://www.instagram.com/sipsedona/"),
-                       ("Facebook", "https://www.facebook.com/105723664919597"),
+                       ("Facebook", "https://www.facebook.com/sipsedona/"),
                        ("LinkedIn", "https://www.linkedin.com/company/114324066/")]),
     "swa": dict(name="Sedona Wine Adventures", ig="sedonawineadventures",
                 links=[("Instagram", "https://www.instagram.com/sedonawineadventures/"),

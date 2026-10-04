@@ -39,17 +39,36 @@ def cleanify(html):
         html = re.sub(r'href="' + re.escape(href) + r'(#[^"]*)?"', lambda m, h=href: f'href="{clean(h)}{m.group(1) or ""}"', html)
     return html
 
+SIP_CAL = "https://fareharbor.com/embeds/book/winetoursofsedona/items/644318/calendar/?ref=https%3A%2F%2Fwww.sedonawinetours.group"
+PROMO = dict(eyebrow="SIP Sedona special", title="20% off every SIP Sedona tour", text="when you join an existing reservation. Check today's open seats — live availability, book in a minute.",
+             cta="See live availability", url=SIP_CAL)
+
 def header(current):
     links = ""
     for href, label in NAV:
         cur = ' aria-current="page"' if href == current else ""
-        cls = ' class="nav-home"' if href == "index.html" else ""
-        links += f'<a href="{href}"{cur}{cls}>{label}</a>'
-    return f'''<header class="site-header"><div class="wrap">
-  <a class="wordmark" href="index.html" aria-label="Sedona Wine Tours home"><img class="mark" src="/images/swt-emblem-sm.webp" alt="" width="40" height="40"><span>Sedona Wine Tours<small>Sip. Savor. Explore. · Est. 2004</small></span></a>
-  <button class="menu-btn" aria-expanded="false" aria-controls="primary-nav" onclick="var n=document.getElementById('primary-nav');var o=n.classList.toggle('open');this.setAttribute('aria-expanded',o)">Menu</button>
-  <nav class="primary" id="primary-nav" aria-label="Primary">{links}<a class="btn btn-phone" href="tel:{PHONE_MAIN_TEL}">{PHONE_MAIN}</a></nav>
-</div></header>'''
+        links += f'<a href="{href}"{cur}>{label}</a>'
+    return f'''<header class="site-header">
+  <div class="topbar"><div class="wrap">
+    <button class="menu-btn" aria-expanded="false" aria-controls="primary-nav" onclick="var n=document.getElementById('primary-nav');var o=n.classList.toggle('open');this.setAttribute('aria-expanded',o)">Menu</button>
+    <nav class="primary" id="primary-nav" aria-label="Primary">{links}</nav>
+    <a class="topbar-phone" href="tel:{PHONE_MAIN_TEL}">{PHONE_MAIN}</a>
+  </div></div>
+  <div class="masthead"><div class="wrap">
+    <div class="brand">
+      <a class="brand-name" href="index.html">Sedona Wine Tours</a>
+      <span class="brand-tag">Sip. Savor. Explore. · Since 2004</span>
+      <a class="brand-phone" href="tel:{PHONE_MAIN_TEL}">Call or text {PHONE_MAIN}</a>
+    </div>
+    <a class="emblem-link" href="index.html" aria-label="Sedona Wine Tours home"><img class="emblem-img" src="/images/swt-emblem-md.webp" alt="Sedona Wine Tours — Wine Tours of Sedona, SIP Sedona and Sedona Wine Adventures" width="200" height="200" fetchpriority="high"></a>
+    <a class="promo" href="{PROMO["url"]}" rel="noopener">
+      <span class="promo-eyebrow">{PROMO["eyebrow"]}</span>
+      <strong>{PROMO["title"]}</strong>
+      <span class="promo-text">{PROMO["text"]}</span>
+      <span class="promo-cta">{PROMO["cta"]} →</span>
+    </a>
+  </div></div>
+</header>'''
 
 FOOTER = f'''<footer><div class="wrap">
   <div class="cols">
