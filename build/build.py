@@ -81,8 +81,9 @@ FOOTER = f'''<footer><div class="wrap">
   <div class="legal"><span>© 2026 Sedona Wine Tours. All tours depart from Sedona, Arizona and serve the Verde Valley, Jerome, Cottonwood, Page Springs, Cornville, Clarkdale, Camp Verde and Flagstaff.</span><span>Please drink responsibly. Guests must be 21+ to taste.</span></div>
 </div></footer>'''
 
-def page(slug, title, description, body, schema, current=None, brand_class="", canonical=None, og_title=None):
+def page(slug, title, description, body, schema, current=None, brand_class="", canonical=None, og_title=None, chatbot=None):
     canonical = canonical or (SITE + ("/" if slug == "index.html" else clean(slug)))
+    bot = chatbot_snippet(chatbot or CHATBOT_DEFAULT.get(slug) or CHATBOT_DEFAULT.get(current or ""))
     ld = "\n".join(f'<script type="application/ld+json">{json.dumps(s, ensure_ascii=False)}</script>' for s in schema)
     return f'''<!DOCTYPE html>
 <html lang="en">
@@ -113,8 +114,22 @@ def page(slug, title, description, body, schema, current=None, brand_class="", c
 {body}
 </main>
 {FOOTER}
+{bot}
 </body>
 </html>'''
+
+# ---------- Chatbots (Yonder) ----------
+# build/chatbots.json: {"wtos": "<script ...>", "sip": "...", "swa": "..."} — the exact install
+# snippet Yonder gives for each division's bot. Pages map to a division below; pages not
+# listed get no chatbot. Empty string = none.
+CHATBOT_DEFAULT = {"wine-tours-of-sedona.html": "wtos", "sip-sedona.html": "sip", "sedona-wine-adventures.html": "swa",
+                   "index.html": "wtos", "groups-corporate-weddings.html": "wtos", "pricing-and-policies.html": "wtos",
+                   "sedona-wineries-and-vineyards.html": "wtos", "reviews.html": "wtos", "blog/index.html": "wtos"}
+def chatbot_snippet(key):
+    f = HERE / "chatbots.json"
+    if not key or not f.exists():
+        return ""
+    return json.load(open(f)).get(key, "") or ""
 
 # ---------- Shared schema ----------
 ORG = {
@@ -225,7 +240,6 @@ def build():
     (OUT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>')
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
     (OUT / "404.html").write_text(cleanify(page(slug="404.html", title="Page not found | Sedona Wine Tours", description="That page isn't here — head back to Sedona Wine Tours.", body='<section><div class="wrap"><h1>That trail doesn\'t go anywhere.</h1><p class="lede">The page you were after has moved or never existed. Head back home, or call us at <a href="tel:+19285042445">(928) 504-2445</a> and we\'ll point you in the right direction.</p><p><a class="btn btn-primary" href="index.html">Back to Sedona Wine Tours</a></p></div></section>', schema=[], current="index.html")))
-    shutil.copy(HERE / "LAUNCH-GUIDE.md", OUT / "LAUNCH-GUIDE.md")
     build_preview(pages)
     print("built", [p["slug"] for p in pages])
 

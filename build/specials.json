@@ -1,9 +1,22 @@
 {
-  "updated": "2026-10-03",
+  "updated": "2026-10-04",
   "heading": "This month at Sedona Wine Tours",
   "items": [
-    {"title": "Sedona Winefest weekend", "text": "Use code WINEFEST when you book any Wine Tours of Sedona tour around the festival weekend and we'll take care of the rest — including the ride home.", "cta": "Book with code WINEFEST", "url": "https://winetoursofsedona.com/book-now-tour-menu/", "division": "wtos", "confirm": true},
-    {"title": "Seen us in USA Today?", "text": "Readers get a little something extra: enter code USATODAY at checkout on any private tour.", "cta": "Book a private tour", "url": "https://winetoursofsedona.com/book-now-tour-menu/", "division": "wtos", "confirm": true},
-    {"title": "Bring your dog, save 10%", "text": "Well-behaved pups ride free and you save 10% with code DOGFRIENDLY on Wine Tours of Sedona and Sedona Wine Adventures tours. Left yours at home? Our guide dog Ama can fill in.", "cta": "Dog-friendly tours", "url": "/pricing-and-policies", "division": "swa", "confirm": false}
+    {
+      "title": "Seen us in USA Today?",
+      "text": "Readers get a little something extra: enter code USATODAY at checkout on any private tour.",
+      "cta": "Book a private tour",
+      "url": "https://winetoursofsedona.com/book-now-tour-menu/",
+      "division": "wtos",
+      "confirm": true
+    },
+    {
+      "title": "Bring your dog, save 10%",
+      "text": "Well-behaved pups ride free and you save 10% with code DOGFRIENDLY on Wine Tours of Sedona and Sedona Wine Adventures tours. Left yours at home? Our guide dog Ama can fill in.",
+      "cta": "Dog-friendly tours",
+      "url": "/pricing-and-policies",
+      "division": "swa",
+      "confirm": false
+    }
   ]
 }
