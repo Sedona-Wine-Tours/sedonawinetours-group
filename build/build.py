@@ -40,7 +40,7 @@ def cleanify(html):
     return html
 
 SIP_CAL = "https://fareharbor.com/embeds/book/winetoursofsedona/items/644318/calendar/?ref=https%3A%2F%2Fwww.sedonawinetours.group"
-PROMO = dict(eyebrow="SIP Sedona special", title="20% off every SIP Sedona tour", text="when you join an existing reservation. Check today's open seats — live availability, book in a minute.",
+PROMO = dict(eyebrow="SIP Sedona special", title="20% off every SIP Sedona tour", text="on any open seat of an already-scheduled tour — applied automatically at checkout.",
              cta="See live availability", url=SIP_CAL)
 
 def header(current):
@@ -62,10 +62,10 @@ def header(current):
       <span class="brand-since">Since 2004</span>
     </div>
     <a class="emblem-link" href="index.html" aria-label="Sedona Wine Tours home"><img class="emblem-img" src="/images/swt-emblem-md.webp" alt="Sedona Wine Tours — Wine Tours of Sedona, SIP Sedona and Sedona Wine Adventures" width="220" height="220" fetchpriority="high"></a>
-    <a class="promo" href="{PROMO["url"]}" rel="noopener" aria-label="20% off every SIP Sedona tour when you join an existing reservation — see live availability">
+    <a class="promo" href="{PROMO["url"]}" rel="noopener" aria-label="20% off any open seat on an already-scheduled SIP Sedona tour, applied automatically at checkout — see live availability">
       <span class="promo-tag">SIP Sedona deal</span>
       <span class="promo-big">20<small>%</small> OFF</span>
-      <span class="promo-line">every SIP Sedona tour when you join an existing reservation</span>
+      <span class="promo-line">any open seat on an already-scheduled SIP Sedona tour — discount applied automatically at checkout</span>
       <span class="promo-cta">See today's open seats →</span>
     </a>
   </div></div>
