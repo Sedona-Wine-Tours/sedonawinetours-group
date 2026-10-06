@@ -15,6 +15,7 @@ ADDRESS = "2020 Contractors Road, Suite 3, Sedona, AZ 86336"
 FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Figtree:wght@400;500;600;700&display=swap">'
 
 CSS = (HERE / "styles.css").read_text() + __import__("reviews").REVIEWS_CSS + __import__("social").SOCIAL_CSS
+CSS_VER = __import__("hashlib").md5(CSS.encode()).hexdigest()[:8]
 
 NAV = [
     ("index.html", "Home"),
@@ -122,7 +123,7 @@ def page(slug, title, description, body, schema, current=None, brand_class="", c
 <meta name="twitter:card" content="summary_large_image">
 <meta name="geo.region" content="US-AZ"><meta name="geo.placename" content="Sedona"><meta name="geo.position" content="34.8697;-111.7610"><meta name="ICBM" content="34.8697, -111.7610">
 {FONTS}
-<link rel="stylesheet" href="/assets/styles.css">
+<link rel="stylesheet" href="/assets/styles.css?v={CSS_VER}">
 <link rel="alternate" type="application/rss+xml" title="Sedona Wine Tours blog" href="/blog/feed.xml">
 <script src="https://fareharbor.com/embeds/api/v1/?autolightframe=yes" async defer></script>
 {ld}
