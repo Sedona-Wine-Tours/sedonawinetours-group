@@ -165,21 +165,11 @@ if(location.hash){{var t=document.querySelector('.chip[data-filter="'+location.h
 
 
 def reviews_schema(reviews, key=None, n=10):
-    """AggregateRating + a handful of Review items for a division (or all)."""
-    keys = [key] if key else list(DIVISIONS)
-    out = []
-    for k in keys:
-        d = DIVISIONS[k]
-        if not d.get("count"):
-            continue
-        out.append({"@context": "https://schema.org", "@type": "TouristTrip", "name": f"{d['name']} wine tours",
-                    "provider": {"@type": "Organization", "name": d["name"], "url": d["site"]},
-                    "url": f"{SITE}/{d['slug'][:-5]}",
-                    "aggregateRating": {"@type": "AggregateRating", "ratingValue": d["avg"], "reviewCount": d["count"], "bestRating": 5},
-                    "review": [{"@type": "Review", "author": {"@type": "Person", "name": r["name"]}, "datePublished": r["date"],
-                                "reviewRating": {"@type": "Rating", "ratingValue": 5, "bestRating": 5}, "reviewBody": r["text"][:500]}
-                               for r in curated(reviews, k, n)]})
-    return out
+    """Intentionally empty. Google's Review-snippet rules treat ratings a business
+    publishes about itself as self-serving and only allow them on a short list of
+    types (TouristTrip is not one), so Search Console flagged the old markup.
+    Reviews stay on the page as visible content; the structured data omits them."""
+    return []
 
 
 REVIEWS_CSS = '''
