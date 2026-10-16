@@ -390,3 +390,7 @@ nav.primary a{font-size:.92rem}
 .follow-row{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;font-size:.95rem}
 .follow-row strong{min-width:200px}
 .btn-sm{padding:.4rem .8rem;font-size:.85rem}
+.footer-follow{margin-top:2rem;padding-top:1.2rem;border-top:1px solid var(--line)}
+.footer-follow ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.4rem 2rem}
+@media (max-width:560px){.footer-follow ul{grid-template-columns:1fr}}
+.footer-follow li span{display:inline-block;min-width:11.5em;color:var(--ink-3)}
