@@ -24,7 +24,19 @@ SOCIAL = {
                        ("Facebook", "https://www.facebook.com/sedonawineadventuresWineTours/"),
                        ("LinkedIn", "https://www.linkedin.com/company/60235359/")]),
 }
-GROUP_LINKS = [("LinkedIn", "https://www.linkedin.com/company/114524044/")]
+GROUP_LINKS = [("Instagram", "https://www.instagram.com/sedona_wine_tours/"),
+               ("Facebook", "https://www.facebook.com/1271791449360599"),
+               ("LinkedIn", "https://www.linkedin.com/company/114524044/")]
+
+
+def footer_follow_html():
+    """Compact 'Follow us' block for the site-wide footer: every brand's own accounts."""
+    rows = [("Sedona Wine Tours", GROUP_LINKS)] + [(SOCIAL[k]["name"], SOCIAL[k]["links"]) for k in ("wtos", "sip", "swa")]
+    out = ""
+    for name, links in rows:
+        out += f'<li><span>{name}</span> ' + " · ".join(
+            f'<a href="{u}" rel="noopener" target="_blank" aria-label="{name} on {n}">{n}</a>' for n, u in links) + "</li>"
+    return f'<div class="footer-follow"><h4>Follow us</h4><ul>{out}</ul></div>'
 
 
 def same_as():
@@ -91,4 +103,8 @@ SOCIAL_CSS = '''
 .follow-row{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;font-size:.95rem}
 .follow-row strong{min-width:200px}
 .btn-sm{padding:.4rem .8rem;font-size:.85rem}
+.footer-follow{margin-top:2rem;padding-top:1.2rem;border-top:1px solid var(--line)}
+.footer-follow ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.4rem 2rem}
+@media (max-width:560px){.footer-follow ul{grid-template-columns:1fr}}
+.footer-follow li span{display:inline-block;min-width:11.5em;color:var(--ink-3)}
 '''

@@ -99,6 +99,7 @@ FOOTER = f'''<footer><div class="wrap">
       <li>Sedona Wine Adventures <a href="tel:{PHONE_SWA_TEL}">{PHONE_SWA}</a></li>
     </ul></div>
   </div>
+  {__import__("social").footer_follow_html()}
   <div class="legal"><span>© 2026 Sedona Wine Tours. All tours depart from Sedona, Arizona and serve the Verde Valley, Jerome, Cottonwood, Page Springs, Cornville, Clarkdale, Camp Verde and Flagstaff.</span><span>Please drink responsibly. Guests must be 21+ to taste.</span></div>
 </div></footer>'''
 

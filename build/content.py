@@ -300,7 +300,7 @@ HOME_BODY = f'''
       <div><span class="dot" style="background:var(--cathedral)"></span><strong>SIP Sedona</strong><a href="tel:{PHONE_SIP_TEL}">{PHONE_SIP}</a></div>
       <div><span class="dot" style="background:var(--verde)"></span><strong>Sedona Wine Adventures</strong><a href="tel:{PHONE_SWA_TEL}">{PHONE_SWA}</a></div>
     </div>
-    <p style="margin-top:1.2rem;color:var(--ink-2)">{ADDRESS} · Mail: P.O. Box 1280, Sedona, AZ 86339<br>Day-trip meeting point: The Art of Wine, Hyatt Piñon Pointe Shops, 101 N Hwy 89A, Sedona<br>Tours depart daily; office hours 8 a.m. – 6 p.m. Arizona time.</p>
+    <p style="margin-top:1.2rem;color:var(--ink-2)">Email: <a href="mailto:tours@sedonawinetours.group">tours@sedonawinetours.group</a><br>{ADDRESS} · Mail: P.O. Box 1280, Sedona, AZ 86339<br>Day-trip meeting point: The Art of Wine, Hyatt Piñon Pointe Shops, 101 N Hwy 89A, Sedona<br>Tours depart daily; office hours 8 a.m. – 6 p.m. Arizona time.</p>
     <img src="images/three-divisions-banner.jpg" alt="Sedona Wine Tours — Wine Tours of Sedona, SIP Sedona and Sedona Wine Adventures logos over the red rocks" width="650" height="360" loading="lazy" style="border-radius:12px;margin-top:1rem;border:1px solid var(--line)">
   </div>
   <form name="contact" method="POST" action="/contact.php">
@@ -318,7 +318,7 @@ HOME_BODY = f'''
 HOME = dict(
   slug="index.html",
   title="Sedona Wine Tours | Wine Tasting Tours, Private, Group &amp; Packages",
-  description="Sedona wine tours since 2004: private all-inclusive, small-group and pay-as-you-go wine tasting tours to Verde Valley wineries and vineyards. Compare packages and prices. (928) 504-2445.",
+  description="Sedona wine tours since 2004: private all-inclusive, affordable small-group and pay-as-you-go wine tasting tours to Verde Valley wineries, transportation included. Compare group packages and prices. (928) 504-2445.",
   body=HOME_BODY,
   schema=[ORG, faq_schema(HOME_FAQ), {"@context":"https://schema.org","@type":"WebSite","url":SITE,"name":"Sedona Wine Tours","publisher":{"@id":f"{SITE}/#org"}}],
 )
@@ -530,7 +530,7 @@ SWA = dict(
 # ---------------------------------------------------------------- GROUPS
 GROUPS_FAQ_RAW = [
   ("How large a group can you take on a Sedona wine tour?", "Two to fourteen in a private vehicle, ten to thirty-three in a SIP Sedona van or coach, and larger with multiple vehicles running the same itinerary — we've handled a dozen to a hundred-plus. Groups of fifteen or more with their own motorcoach can use our step-on guide service at a 20% discount, or we can provide the transportation for $3,000 plus the per-person rate."),
-  ("What's the group discount?", "Groups of six to fourteen adults get 20% off retail on every Wine Tours of Sedona tour; an 18% gratuity is added for six or more. For example, the Terroir of the Verde Valley Wine Trail is $375 retail and $300 per adult for a group, $354 with gratuity. Non-drinking adults are 25% off. For fifteen or more, call (928) 224-2991."),
+  ("What's the group discount?", "Groups of six to fourteen adults get 20% off retail on every Wine Tours of Sedona tour; an 18% gratuity is added for six or more. For example, the Terroir of the Verde Valley Wine Trail is $375 retail and $300 per adult for a group, $354 with gratuity. Non-drinking adults are 25% off. For fifteen or more, call (928) 504-2445."),
   ("Do you do corporate wine tours and team building?", "Yes. A typical corporate day is a private vehicle or coach, a welcome tasting with charcuterie, lunch at Merkin's Hilltop Trattoria or a vineyard picnic, and a route that leaves time for the group to actually talk. We invoice the company and handle dietary requests."),
   ("What's the best Sedona bachelorette wine tour?", "For most parties it's SIP Sedona's 5-Hour Wine, Beer &amp; Beyond booked as a private van ($500 plus tastings and gratuity), or Wine Tours of Sedona's 8-hour Bachelorette Special ($600 retail, $480 per adult for six or more — six flights and lunch included) if you want everything prepaid. Call us and we'll match the format to the group."),
   ("Can you shuttle wedding guests between venues?", "That's SIP Sedona's specialty: coordinated pickups from Sedona hotels and rentals to ceremony and reception, with return runs at night. Vans are $250 per hour and coaches $400 per hour, anywhere in the Verde Valley."),
