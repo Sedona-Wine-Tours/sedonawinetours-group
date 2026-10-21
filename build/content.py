@@ -814,8 +814,8 @@ WINERIES_BODY = f"""
 
 WINERIES_PAGE = dict(
   slug="sedona-wineries-and-vineyards.html",
-  title="Wineries in Sedona &amp; Verde Valley Vineyards | Insider's Guide",
-  description="Every winery, vineyard, tasting room and brewery near Sedona, AZ — Alcantara, DA Ranch, Page Springs, Old Town Cottonwood, Jerome, Clarkdale and Flagstaff's eight breweries — with specialties and which tour visits each. From Sedona's guides since 2004.",
+  title="Wineries in Sedona, AZ &amp; Vineyards Near Sedona | Insider's Guide",
+  description="Every winery, vineyard, tasting room and brewery in and near Sedona, Arizona — Alcantara, DA Ranch, Page Springs, Old Town Cottonwood, Jerome, Clarkdale and Flagstaff's eight breweries — with specialties and which tour visits each. From Sedona's guides since 2004.",
   body=WINERIES_BODY,
   schema=[breadcrumbs([("Home","index.html"),("Wineries & vineyards near Sedona","sedona-wineries-and-vineyards.html")]), faq_schema(WINERY_FAQ)],
 )
