@@ -129,8 +129,14 @@ HOME_FAQ_RAW = [
    "Yes. All three divisions pick up anywhere within Sedona city limits at no charge. Wine Tours of Sedona and Sedona Wine Adventures also pick up outside town for a flat fee — $75 in Cornville, Clarkdale and Cottonwood, $100 in Jerome, $200 in Flagstaff or Munds Park, $300 in Prescott. Day-trippers meet us at The Art of Wine at the Hyatt Piñon Pointe Shops, 101 N Hwy 89A."),
   ("Which wineries and tasting rooms do you visit?",
    "Every stop on the Verde Valley Wine Trail — eight vineyard locations and around twenty tasting rooms — plus seven micro-breweries and Flagstaff. Estate vineyards in Page Springs, Cornville and Camp Verde (Alcantara, DA Ranch, Page Springs Cellars, Javelina Leap, Oak Creek, Cove Mesa, Salt Mine, Clear Creek), the nine tasting rooms of Old Town Cottonwood, historic Jerome, Clarkdale's Southwest Wine Center, and Sedona's own tasting rooms. See the full list below."),
-  ("Can I bring my dog on a Sedona wine tour?",
-   "Yes, and you'll save 10%. Well-behaved, friendly dogs are welcome on Wine Tours of Sedona and Sedona Wine Adventures tours — use promo code DOGFRIENDLY when you book and we'll route the day through dog-friendly patios. Left yours at home? Our company guide dog, Ama, is happy to fill in."),
+  ("Are there dog-friendly wine tours in Sedona?",
+   "Yes, and you'll save 10%. Well-behaved, friendly dogs are welcome on Wine Tours of Sedona and Sedona Wine Adventures tours, which are private to your group — use promo code DOGFRIENDLY when you book and we'll route the day through dog-friendly patios. SIP Sedona's shared small-group tours aren't dog friendly, since other guests may have allergies. Left yours at home? Our company guide dog, Ama, is happy to fill in."),
+  ("What's the best Sedona wine tour for a bachelorette party?",
+   "For a private party with everything handled, book Wine Tours of Sedona's 8-hour <a href='wine-tours-of-sedona.html'>Sedona &amp; Wine Bachelorette Special</a>: six tasting flights and lunch, your own vehicle for up to 14, and 20% off for groups of six or more. To keep the budget lower, Sedona Wine Adventures' private Everybody's “ABT” Adult Beverage Tour mixes wine, beer and spirits at $50 per person per hour, or the whole party can ride SIP Sedona's 8-Hour SIP All Day Experience. Call <a href='tel:{TEL}'>{NUM}</a> and we'll match the day to your group."),
+  ("How long is a wine tour in Sedona?",
+   "Anywhere from 90 minutes to a full day. Sedona Wine Adventures' Sedona Quickie is 90 minutes; SIP Sedona tours run 3, 4, 5 or 8 hours; Wine Tours of Sedona tours run 3 to 8 hours, and our most popular is 5. For most first-timers, 4 to 5 hours with three or four stops is the sweet spot."),
+  ("Is there a wine tour in Sedona for under two hours?",
+   "Yes. A Sedona Quickie from Sedona Wine Adventures is a private 90-minute tasting at The Art of Wine in Sedona, $95 per person plus gratuity. It fits neatly between a morning hike and dinner."),
   ("How far in advance should I book?",
    "Weekends from March through May and September through November sell out first. Two to three weeks ahead is comfortable; for groups over ten or wedding weekends, give us a month. Some stops need lead time too — the Clarkdale education tour books seven days ahead. Last-minute? Call — we'll tell you honestly what's open."),
 ]
@@ -184,6 +190,7 @@ HOME_BODY = f'''
       <div class="actions"><a class="btn btn-primary" href="sedona-wine-adventures.html">Explore Sedona Wine Adventures</a><a class="btn btn-ghost" href="tel:{PHONE_SWA_TEL}">{PHONE_SWA}</a></div>
     </article>
   </div>
+  <h3 class="compare-h">Wine tours Sedona: compare our three</h3>
   <div class="compare"><table>
     <caption class="sr-only">Side-by-side comparison of our three Sedona wine tour divisions</caption>
     <thead><tr><th scope="col">Compare</th><th scope="col">Wine Tours of Sedona</th><th scope="col">SIP Sedona</th><th scope="col">Sedona Wine Adventures</th></tr></thead>
@@ -202,7 +209,7 @@ HOME_BODY = f'''
 </div></section>
 
 <section style="background:var(--ground-2)"><div class="wrap">
-  <div class="section-head"><div><span class="eyebrow">Why guests choose us</span><h2>Why we're the best choice for a wine tour while you're in Sedona</h2></div><p>Twenty-two years, three brands, one promise: quality tour experiences, private and personalized, with complete flexibility throughout.</p></div>
+  <div class="section-head"><div><span class="eyebrow">Why guests choose us</span><h2>Sedona wine tasting tours: why guests choose us</h2></div><p>Twenty-two years, three brands, one promise: quality tour experiences, private and personalized, with complete flexibility throughout.</p></div>
   <div class="pillars">
     <div class="pillar"><div class="glyph">04</div><h3>Sedona's most experienced wine tour company</h3><p>We started Wine Tours of Sedona in 2004, before the Verde Valley had an AVA (it earned one in December 2021) and before most of today's tasting rooms existed. We know which cellar door to knock on.</p></div>
     <div class="pillar"><div class="glyph">G</div><h3>Guides, not drivers</h3><p>Every tour is led by a trained local guide who shares the geology, the vortex sites, the flora and fauna, Native American and pioneer history, a little western-movie lore and a lot of Sedona fun facts between pours.</p></div>

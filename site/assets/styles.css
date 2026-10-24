@@ -161,6 +161,7 @@ nav.primary a:hover,nav.primary a[aria-current]{color:#fff;border-bottom-color:v
 .division dd{margin:0;font-weight:600}
 .division .actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:auto}
 .compare{margin-top:2rem;overflow-x:auto}
+.compare-h{margin:2.4rem 0 0;font-size:1.25rem}
 .compare table{width:100%;border-collapse:collapse;font-size:.95rem;min-width:640px}
 .compare th,.compare td{padding:.8rem .9rem;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
 .compare thead th{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
