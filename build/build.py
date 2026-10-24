@@ -14,6 +14,17 @@ ADDRESS = "2020 Contractors Road, Suite 3, Sedona, AZ 86336"
 
 FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Figtree:wght@400;500;600;700&display=swap">'
 
+# Google Analytics 4 — property "sedonawinetours.group" (552999572), web stream 15729335570.
+# Cross-domain linker keeps one session from here into FareHarbor checkout and the division sites.
+GA4_ID = "G-20LZG09PNP"
+GA4 = f'''<script async src="https://www.googletagmanager.com/gtag/js?id={GA4_ID}"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments);}}gtag('js',new Date());
+gtag('config','{GA4_ID}',{{linker:{{domains:['sedonawinetours.group','fareharbor.com','winetoursofsedona.com','sipsedona.com','sedonawineadventures.com']}}}});
+document.addEventListener('click',function(e){{var a=e.target.closest&&e.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href');
+if(/^tel:/.test(h))gtag('event','phone_click',{{link_url:h}});
+else if(/fareharbor\\.com/.test(h))gtag('event','begin_checkout',{{link_url:h}});
+else if(/winetoursofsedona\\.com|sipsedona\\.com|sedonawineadventures\\.com/.test(h))gtag('event','division_click',{{link_url:h}});}},true);</script>'''
+
 CSS = (HERE / "styles.css").read_text() + __import__("reviews").REVIEWS_CSS + __import__("social").SOCIAL_CSS
 CSS_VER = __import__("hashlib").md5(CSS.encode()).hexdigest()[:8]
 
@@ -112,6 +123,7 @@ def page(slug, title, description, body, schema, current=None, brand_class="", c
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+{GA4}
 <title>{title}</title>
 <meta name="description" content="{description}">
 <link rel="canonical" href="{canonical}">
