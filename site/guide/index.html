@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Guide Tour Form · Sedona Wine Tours</title>
+<link rel="icon" href="/images/favicon.png">
+<style>
+:root{--bg:#f7f3ee;--card:#fff;--ink:#241a1d;--muted:#6f6166;--line:#e4d9d4;--brand:#5b2c3a;--brand-2:#8a4457;--ok:#1f7a4d;--warn:#b35a00;--bad:#b42318;--chip:#f1e6ea}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+header{background:var(--brand);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
+header h1{font-size:17px;margin:0;font-weight:600;letter-spacing:.2px}
+header .who{font-size:13px;opacity:.9}
+header button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:8px;padding:6px 10px;font-size:13px}
+main{max-width:640px;margin:0 auto;padding:16px 16px 80px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.card h2{font-size:16px;margin:0 0 10px;color:var(--brand)}
+.card h3{font-size:15px;margin:14px 0 6px}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-weight:600}
+input[type=text],input[type=number],input[type=password],input[type=time],input[type=date],select,textarea{width:100%;font:inherit;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+textarea{min-height:96px;resize:vertical}
+input[type=number]{-moz-appearance:textfield}
+.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
+.btn{display:inline-block;width:100%;padding:14px 16px;border-radius:12px;border:0;background:var(--brand);color:#fff;font:inherit;font-weight:600;font-size:16px;cursor:pointer}
+.btn.secondary{background:#fff;color:var(--brand);border:1.5px solid var(--brand)}
+.btn.small{width:auto;padding:8px 12px;font-size:14px;border-radius:9px}
+.btn.ghost{background:transparent;color:var(--brand);border:1px dashed var(--brand);font-weight:500}
+.btn:disabled{opacity:.5}
+.muted{color:var(--muted);font-size:13px}
+.tour{border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;display:flex;justify-content:space-between;gap:10px;align-items:center;cursor:pointer;background:#fff}
+.tour:active{background:#faf5f3}
+.tour .t{font-weight:600}.tour .s{font-size:13px;color:var(--muted)}
+.badge{font-size:11px;padding:3px 8px;border-radius:999px;background:var(--chip);color:var(--brand);white-space:nowrap;font-weight:600}
+.badge.ok{background:#e4f3ea;color:var(--ok)}.badge.mine{background:#fff1e1;color:var(--warn)}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{flex:1;padding:11px 6px;border:0;background:#fff;font:inherit;font-size:14px;color:var(--ink)}
+.seg button.on{background:var(--brand);color:#fff;font-weight:600}
+.chk{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:15px}
+.chk input{width:22px;height:22px;accent-color:var(--brand)}
+.line{display:grid;grid-template-columns:1fr 92px 110px 34px;gap:6px;align-items:center;margin:6px 0}
+.line.tip{grid-template-columns:1fr 110px 34px}
+.x{border:0;background:transparent;color:var(--bad);font-size:20px;line-height:1;cursor:pointer}
+.note{background:#fff8ef;border:1px solid #f1d9b5;border-radius:10px;padding:10px 12px;font-size:14px;margin:8px 0}
+.err{background:#fdeceb;border:1px solid #f3b9b4;color:var(--bad);border-radius:10px;padding:10px 12px;font-size:14px;margin:8px 0}
+.okbox{background:#e9f6ee;border:1px solid #b9e0c6;border-radius:10px;padding:12px;margin:8px 0}
+.booking{border:1.5px solid var(--brand);border-radius:12px;padding:12px;margin:12px 0;background:#fffdfc}
+.booking h3{margin-top:0;color:var(--brand)}
+.sticky{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%)}
+.sticky .btn{max-width:640px;margin:0 auto;display:block}
+.hidden{display:none!important}
+.pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:13px;margin:3px 4px 3px 0;background:#fff}
+.pill.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
+.modal .card{max-width:420px;width:100%}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:s 1s linear infinite;vertical-align:-3px;margin-right:6px}
+@keyframes s{to{transform:rotate(360deg)}}
+small.help{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Guide Tour Form</h1>
+  <div><span class="who" id="who"></span> <button id="signout" class="hidden">Sign out</button></div>
+</header>
+<main id="app"></main>
+<script>
+var API = 'https://script.google.com/macros/s/AKfycbxk6VP_HYvcTbLTicIBSutAHZoLcOWlAHf4o9LlOU0KinTWN-E-15MFqiPbHC8binpc/exec';
+var FALLBACK_GUIDES = ['Jim', 'Juan', 'Ed', 'Uma'];
+var S = { session: null, boot: null, bookings: [], view: 'login', run: null, editing: null, mine: [] };
+
+// ------------------------------------------------------------ api
+function api(params) {
+  params = params || {};
+  if (S.session && !params.token) params.token = S.session.token;
+  return fetch(API, { method: 'POST', body: JSON.stringify(params), redirect: 'follow' })
+    .then(function (r) { return r.json(); })
+    .then(function (j) { if (!j.ok) throw new Error(j.error || 'Request failed'); return j.data !== undefined ? j.data : j; });
+}
+function el(h) { var d = document.createElement('div'); d.innerHTML = h.trim(); return d.firstChild; }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function $(sel, root) { return (root || document).querySelector(sel); }
+function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+function money(n) { return '$' + (Number(n) || 0).toFixed(2); }
+function todayStr(off) { var d = new Date(Date.now() - (off || 0) * 86400000); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function niceDate(ymd) { if (!ymd) return ''; var p = ymd.split('-'); var d = new Date(p[0], p[1] - 1, p[2]); return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); }
+function to24(t) { if (!t) return ''; var m = String(t).match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i); if (!m) return ''; var h = +m[1]; if (m[3]) { if (/pm/i.test(m[3]) && h < 12) h += 12; if (/am/i.test(m[3]) && h === 12) h = 0; } return ('0' + h).slice(-2) + ':' + m[2]; }
+function to12(t) { if (!t) return ''; var p = t.split(':'); var h = +p[0]; var ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return h + ':' + p[1] + ' ' + ap; }
+function addHours(t, h) { if (!t) return ''; var p = t.split(':'); var mins = (+p[0]) * 60 + (+p[1]) + Math.round(h * 60); mins = ((mins % 1440) + 1440) % 1440; return ('0' + Math.floor(mins / 60)).slice(-2) + ':' + ('0' + (mins % 60)).slice(-2); }
+function minsBetween(a, b) { if (!a || !b) return 0; var pa = a.split(':'), pb = b.split(':'); return ((+pb[0]) * 60 + (+pb[1])) - ((+pa[0]) * 60 + (+pa[1])); }
+
+// ------------------------------------------------------------ views
+function render() {
+  var app = $('#app'); app.innerHTML = '';
+  $('#who').textContent = S.session ? S.session.guide : '';
+  $('#signout').classList.toggle('hidden', !S.session);
+  if (S.view === 'login') return app.appendChild(loginView());
+  if (S.view === 'home') return app.appendChild(homeView());
+  if (S.view === 'form') return app.appendChild(formView());
+  if (S.view === 'done') return app.appendChild(doneView());
+}
+
+function loginView() {
+  var v = el('<div><div class="card"><h2>Sign in</h2><label>Your name</label><select id="g"></select><label>PIN</label><input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="4-digit PIN" autocomplete="off"><div id="lerr"></div><div style="margin-top:14px"><button class="btn" id="go">Continue</button></div></div><p class="muted">Fill this out right after every tour. Pick the tour from the list, confirm the details, add expenses and tips, and tap Submit. Questions: text Jim.</p></div>');
+  var sel = $('#g', v);
+  (S.guideNames || FALLBACK_GUIDES).forEach(function (n) { sel.appendChild(el('<option>' + esc(n) + '</option>')); });
+  try { var last = localStorage.getItem('swt_guide'); if (last) sel.value = last; } catch (e) { }
+  function go() {
+    var btn = $('#go', v); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Signing in';
+    api({ action: 'login', guide: sel.value, pin: $('#pin', v).value }).then(function (d) {
+      S.session = d.session; try { localStorage.setItem('swt_session', JSON.stringify(d.session)); localStorage.setItem('swt_guide', sel.value); } catch (e) { }
+      return loadHome();
+    }).catch(function (e) { $('#lerr', v).innerHTML = '<div class="err">' + esc(e.message) + '</div>'; btn.disabled = false; btn.textContent = 'Continue'; });
+  }
+  $('#go', v).onclick = go; $('#pin', v).addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+  return v;
+}
+
+function loadHome() {
+  S.view = 'home'; S.loading = true; render();
+  return Promise.all([api({ action: 'bootstrap' }), api({ action: 'bookings', days: 2 }), api({ action: 'mine' })]).then(function (r) {
+    S.boot = r[0]; S.bookings = r[1].bookings; S.window = r[1]; S.mine = r[2]; S.loading = false; render();
+  }).catch(function (e) { S.loading = false; if (/signed in/i.test(e.message)) { S.session = null; S.view = 'login'; } S.error = e.message; render(); });
+}
+
+function homeView() {
+  var v = el('<div></div>');
+  if (S.loading) { v.appendChild(el('<div class="card"><span class="spin" style="border-color:var(--brand);border-top-color:transparent"></span> Loading your tours…</div>')); return v; }
+  if (S.error) { v.appendChild(el('<div class="err">' + esc(S.error) + '</div>')); S.error = null; }
+  var me = S.session.guide;
+  var list = S.bookings.slice();
+  // group SIP bookings by date+start so a run shows once
+  var card = el('<div class="card"><h2>Pick the tour you just finished</h2><p class="muted">Showing ' + niceDate(S.window.from) + ' – ' + niceDate(S.window.to) + '. Tours assigned to you are listed first.</p><div id="list"></div><div style="margin-top:12px"><button class="btn ghost" id="manual">Tour not listed? Enter it manually</button></div></div>');
+  var listEl = $('#list', card);
+  var mineFirst = list.sort(function (a, b) { var am = (a.crew || '').indexOf(me) >= 0 ? 0 : 1, bm = (b.crew || '').indexOf(me) >= 0 ? 0 : 1; if (am !== bm) return am - bm; return (b.date + b.start) < (a.date + a.start) ? -1 : 1; });
+  if (!mineFirst.length) listEl.appendChild(el('<p class="muted">No FareHarbor bookings found for these days yet. Use manual entry below.</p>'));
+  mineFirst.forEach(function (b) {
+    var badge = b.recorded ? '<span class="badge ok">Recorded' + (b.recorded.by ? ' by ' + esc(b.recorded.by) : '') + '</span>' : ((b.crew || '').indexOf(me) >= 0 ? '<span class="badge mine">Assigned to you</span>' : '');
+    var row = el('<div class="tour"><div><div class="t">' + esc(b.tour) + '</div><div class="s">' + niceDate(b.date) + ' · ' + esc(b.start) + ' · ' + esc(b.customer) + ' · ' + (b.adults + b.kids) + ' guests · ' + esc(b.division) + '</div></div>' + badge + '</div>');
+    row.onclick = function () { startRun(b); };
+    listEl.appendChild(row);
+  });
+  $('#manual', card).onclick = function () { startRun(null); };
+  v.appendChild(card);
+  if (S.mine && S.mine.length) {
+    var mc = el('<div class="card"><h2>Your recent entries</h2><p class="muted">Tap one to correct it. The original is kept in the archive.</p><div id="mine"></div></div>');
+    S.mine.slice(0, 12).forEach(function (m) {
+      var p = m.payload || {}; var first = (p.bookings || [])[0] || {};
+      var row = el('<div class="tour"><div><div class="t">' + esc(first.tour || p.division || 'Entry') + '</div><div class="s">' + esc(niceDate(first.date)) + ' · ' + esc((p.bookings || []).map(function (x) { return x.customer; }).join(', ')) + ' · submitted ' + esc(String(m.submittedAt).replace('T', ' ').slice(0, 16)) + '</div></div><span class="badge">Edit</span></div>');
+      row.onclick = function () { confirmEdit(m); };
+      mc.appendChild(row);
+    });
+    v.appendChild(mc);
+  }
+  return v;
+}
+
+function confirmEdit(m) {
+  var modal = el('<div class="modal"><div class="card"><h2 style="color:var(--bad)">YOU ARE EDITING DATA THAT HAS PREVIOUSLY BEEN RECORDED. DO YOU WANT TO PROCEED?</h2><p class="muted">If you choose Yes, the original entry is archived and you re-enter the tour from scratch.</p><div class="row"><button class="btn secondary" id="no">No</button><button class="btn" id="yes">Yes</button></div></div></div>');
+  $('#no', modal).onclick = function () { modal.remove(); };
+  $('#yes', modal).onclick = function () { modal.remove(); S.editing = m; startRun(null, m.payload); };
+  document.body.appendChild(modal);
+}
+
+// ------------------------------------------------------------ run model
+function newBookingEntry(b) {
+  b = b || {};
+  return { bookingId: b.bookingId || '', manual: !b.bookingId, date: b.date || todayStr(), tour: b.tour || '', customer: b.customer || '', email: b.email || '', phone: b.phone || '',
+    adults: b.adults != null ? b.adults : '', kids: b.kids || 0, pets: b.pets || 0, pickupLocation: b.pickup || '', amountPaid: b.amountPaid || '', builtInFromFH: b.builtIn || 0,
+    paymentType: b.paymentType || 'card', ref: b.ref || '', tourDetails: '', customerDetails: '', expenses: [], tips: [], scheduledStart: to24(b.start), scheduledEnd: to24(b.end), duration: b.duration || '' };
+}
+function startRun(b, payload) {
+  var run;
+  if (payload) {
+    run = JSON.parse(JSON.stringify(payload)); run.bookings = run.bookings.map(function (x) { x.tips = x.tips || []; x.expenses = x.expenses || []; return x; });
+  } else {
+    var entry = newBookingEntry(b);
+    run = { division: b ? b.division : 'Wine Tours of Sedona', guide: S.session.guide, secondaryGuide: '', trainee: '', pickupZone: 'Sedona / Uptown / Oak Creek Canyon / Village of Oak Creek',
+      scheduledStart: entry.scheduledStart, scheduledEnd: entry.scheduledEnd || (entry.scheduledStart ? addHours(entry.scheduledStart, entry.duration || 0) : ''), startTime: entry.scheduledStart, finishTime: entry.scheduledEnd || (entry.scheduledStart ? addHours(entry.scheduledStart, entry.duration || 0) : ''),
+      bookedHours: entry.duration || '', overtimeBillable: false, fotaflo: '', bookings: [entry] };
+    if (b && run.division === 'SIP Sedona') {
+      // offer the other bookings on the same run
+      S.bookings.forEach(function (o) { if (o.bookingId !== b.bookingId && o.date === b.date && o.start === b.start && !o.recorded && o.division === 'SIP Sedona') run.bookings.push(newBookingEntry(o)); });
+    }
+  }
+  S.run = run; S.view = 'form'; window.scrollTo(0, 0); render();
+}
+
+// ------------------------------------------------------------ form view
+function formView() {
+  var R = S.run, B = S.boot;
+  var v = el('<div></div>');
+  if (S.editing) v.appendChild(el('<div class="note">Editing a previous entry (' + esc(S.editing.submissionId) + '). Submitting will archive the original.</div>'));
+
+  // --- division / guides
+  var c1 = el('<div class="card"><h2>Tour</h2><label>Company division</label><div class="seg" id="div"></div><div class="row"><div><label>Guide</label><select id="guide"></select></div><div><label>Trainee riding along?</label><select id="trainee"><option value="">No</option></select></div></div><div class="chk"><input type="checkbox" id="sec"><label for="sec" style="margin:0;color:var(--ink)">Second guide on this tour</label></div><div id="secwrap" class="hidden"><label>Second guide</label><select id="guide2"></select></div></div>');
+  var seg = $('#div', c1);
+  B.divisions.forEach(function (d) { var btn = el('<button type="button"' + (R.division === d ? ' class="on"' : '') + '>' + esc(d) + '</button>'); btn.onclick = function () { R.division = d; render(); }; seg.appendChild(btn); });
+  var gsel = $('#guide', c1), g2 = $('#guide2', c1), tr = $('#trainee', c1);
+  B.guides.forEach(function (g) { gsel.appendChild(el('<option' + (R.guide === g.name ? ' selected' : '') + '>' + esc(g.name) + '</option>')); g2.appendChild(el('<option' + (R.secondaryGuide === g.name ? ' selected' : '') + '>' + esc(g.name) + '</option>')); tr.appendChild(el('<option value="' + esc(g.name) + '"' + (R.trainee === g.name ? ' selected' : '') + '>' + esc(g.name) + '</option>')); });
+  if (!S.session.isAdmin) gsel.disabled = true;
+  gsel.onchange = function () { R.guide = gsel.value; };
+  tr.onchange = function () { R.trainee = tr.value; };
+  var sec = $('#sec', c1); sec.checked = !!R.secondaryGuide; $('#secwrap', c1).classList.toggle('hidden', !R.secondaryGuide);
+  sec.onchange = function () { $('#secwrap', c1).classList.toggle('hidden', !sec.checked); R.secondaryGuide = sec.checked ? g2.value : ''; };
+  g2.onchange = function () { R.secondaryGuide = g2.value; };
+  v.appendChild(c1);
+
+  // --- times & pickup
+  var c2 = el('<div class="card"><h2>Times</h2><div class="row"><div><label>Tour start (actual)</label><input type="time" id="st"></div><div><label>Tour finish (actual)</label><input type="time" id="fin"></div></div><div class="row"><div><label>Scheduled end (FareHarbor)</label><input type="time" id="sched"></div><div><label>Booked length (hours)</label><input type="number" id="bh" step="0.25" min="0" inputmode="decimal"></div></div><div id="otwrap"></div><div id="zonewrap"><label>Pickup area</label><select id="zone"></select><small class="help">Pickups in Sedona, Uptown, Oak Creek Canyon and the Village of Oak Creek are free. Out-of-town pickups add paid hours.</small></div></div>');
+  $('#st', c2).value = R.startTime || ''; $('#fin', c2).value = R.finishTime || ''; $('#sched', c2).value = R.scheduledEnd || ''; $('#bh', c2).value = R.bookedHours || '';
+  $('#st', c2).onchange = function () { R.startTime = this.value; }; $('#sched', c2).onchange = function () { R.scheduledEnd = this.value; refreshOT(); }; $('#bh', c2).onchange = function () { R.bookedHours = this.value; };
+  $('#fin', c2).onchange = function () { R.finishTime = this.value; refreshOT(); };
+  var zone = $('#zone', c2); B.zones.forEach(function (z) { zone.appendChild(el('<option' + (R.pickupZone === z.zone ? ' selected' : '') + '>' + esc(z.zone) + (z.hours ? ' (+' + z.hours + ' hr)' : '') + '</option>')); });
+  zone.onchange = function () { R.pickupZone = B.zones[zone.selectedIndex].zone; };
+  $('#zonewrap', c2).classList.toggle('hidden', R.division === 'SIP Sedona');
+  function refreshOT() {
+    var w = $('#otwrap', c2); w.innerHTML = '';
+    var over = minsBetween(R.scheduledEnd, R.finishTime);
+    if (R.scheduledEnd && R.finishTime && over >= 8) {
+      var q = Math.round(over / 15) / 4;
+      w.appendChild(el('<div class="note">Tour ran <b>' + over + ' minutes</b> past the scheduled end (' + q + ' hr rounded to the quarter hour). Is this overtime billable to the customer?</div>'));
+      var s2 = el('<div class="seg"><button type="button">No — not billed</button><button type="button">Yes — bill the customer</button></div>');
+      var bs = $$('button', s2); bs[R.overtimeBillable ? 1 : 0].classList.add('on');
+      bs[0].onclick = function () { R.overtimeBillable = false; refreshOT(); }; bs[1].onclick = function () { R.overtimeBillable = true; refreshOT(); };
+      w.appendChild(s2);
+      if (R.overtimeBillable) w.appendChild(el('<small class="help">Jim will be alerted to charge the customer. You are paid for the extra ' + q + ' hr.</small>'));
+    } else { R.overtimeBillable = false; }
+  }
+  refreshOT();
+  v.appendChild(c2);
+
+  // --- bookings
+  R.bookings.forEach(function (bk, i) { v.appendChild(bookingCard(bk, i)); });
+  if (R.division === 'SIP Sedona') {
+    var add = el('<div class="card"><button class="btn ghost" id="addbk">+ Add another booking on this SIP run</button><div id="pick"></div></div>');
+    $('#addbk', add).onclick = function () {
+      var pick = $('#pick', add); pick.innerHTML = '';
+      var used = R.bookings.map(function (x) { return x.bookingId; });
+      var opts = S.bookings.filter(function (o) { return used.indexOf(o.bookingId) < 0 && !o.recorded; });
+      if (!opts.length) { pick.appendChild(el('<p class="muted">No other unrecorded bookings. Add a manual one:</p>')); var mb = el('<button class="btn small secondary">Add manual booking</button>'); mb.onclick = function () { R.bookings.push(newBookingEntry(null)); copyTourDetails(); render(); }; pick.appendChild(mb); return; }
+      opts.forEach(function (o) { var p = el('<div class="tour"><div><div class="t">' + esc(o.customer) + '</div><div class="s">' + niceDate(o.date) + ' · ' + esc(o.start) + ' · ' + esc(o.tour) + ' · ' + (o.adults + o.kids) + ' guests</div></div><span class="badge">Add</span></div>'); p.onclick = function () { R.bookings.push(newBookingEntry(o)); copyTourDetails(); render(); }; pick.appendChild(p); });
+      var mb2 = el('<button class="btn small secondary" style="margin-top:8px">Or add a manual booking</button>'); mb2.onclick = function () { R.bookings.push(newBookingEntry(null)); copyTourDetails(); render(); }; pick.appendChild(mb2);
+    };
+    v.appendChild(add);
+  }
+
+  // --- photos & submit
+  var c3 = el('<div class="card"><h2>Wrap up</h2><label>Photos uploaded to Fotaflo?</label><div class="seg" id="foto"><button type="button">Yes</button><button type="button">No</button></div><div id="ferr"></div></div>');
+  var fb = $$('button', $('#foto', c3)); if (R.fotaflo === 'Yes') fb[0].classList.add('on'); if (R.fotaflo === 'No') fb[1].classList.add('on');
+  fb[0].onclick = function () { R.fotaflo = 'Yes'; fb[0].classList.add('on'); fb[1].classList.remove('on'); }; fb[1].onclick = function () { R.fotaflo = 'No'; fb[1].classList.add('on'); fb[0].classList.remove('on'); };
+  v.appendChild(c3);
+  var bar = el('<div class="sticky"><button class="btn" id="submit">Submit tour</button></div>');
+  $('#submit', bar).onclick = function () { submitRun($('#submit', bar), $('#ferr', c3)); };
+  v.appendChild(bar);
+  var back = el('<p style="text-align:center"><button class="btn small secondary" id="back">← Back without saving</button></p>');
+  $('#back', back).onclick = function () { S.editing = null; S.run = null; S.view = 'home'; render(); };
+  v.appendChild(back);
+  return v;
+}
+
+function copyTourDetails() { var R = S.run; var first = R.bookings[0]; R.bookings.forEach(function (b, i) { if (i > 0 && !b.tourDetails) b.tourDetails = first.tourDetails; }); }
+
+function bookingCard(bk, i) {
+  var R = S.run, B = S.boot; var multi = R.bookings.length > 1;
+  var c = el('<div class="booking"><h3>' + (multi ? 'Booking ' + (i + 1) : 'Booking') + (bk.bookingId ? ' · #' + esc(bk.bookingId) : ' · manual entry') + (multi ? ' <button class="x" title="Remove" style="float:right">×</button>' : '') + '</h3>' +
+    (bk.manual ? '<div class="row"><div><label>FareHarbor booking # (if known)</label><input type="text" inputmode="numeric" id="bid"></div><div><label>Tour date</label><input type="date" id="bdate"></div></div><label>Tour name</label><input type="text" id="btour" list="tours"><datalist id="tours"></datalist><div class="row"><div><label>Amount paid (FareHarbor total)</label><input type="number" step="0.01" inputmode="decimal" id="bpaid"></div><div><label>Paid by</label><select id="bpay"><option value="card">Card</option><option value="in-store">Cash / other</option></select></div></div>' : '<div class="muted">' + esc(bk.tour) + ' · ' + niceDate(bk.date) + '</div>') +
+    '<label>Client name(s)</label><input type="text" id="bcust"><div class="row"><div><label>Adults</label><input type="number" min="0" inputmode="numeric" id="ba"></div><div><label>Kids</label><input type="number" min="0" inputmode="numeric" id="bk"></div><div><label>Pets</label><input type="number" min="0" inputmode="numeric" id="bp"></div></div>' +
+    '<label>Pickup location</label><input type="text" id="bpick" placeholder="Hotel / address">' +
+    '<label>Tour details (route and stops, in order)</label><textarea id="btd" placeholder="e.g. Sedona Pines / West Sedona / Page Springs North / Oak Creek Vineyards / …"></textarea>' +
+    '<label>Customer details (who they are, occasion, what they liked, purchases)</label><textarea id="bcd"></textarea>' +
+    '<h3>Expenses</h3><div id="exp"></div><button class="btn small secondary" id="addexp">+ Add expense</button>' +
+    '<h3>Tips</h3><div id="builtin"></div><div id="tips"></div><button class="btn small secondary" id="addtip">+ Add tip</button></div>');
+  if (multi) $('.x', c).onclick = function () { R.bookings.splice(i, 1); render(); };
+  if (bk.manual) {
+    $('#bid', c).value = bk.bookingId; $('#bdate', c).value = bk.date; $('#btour', c).value = bk.tour; $('#bpaid', c).value = bk.amountPaid; $('#bpay', c).value = bk.paymentType || 'card';
+    $('#bid', c).onchange = function () { bk.bookingId = this.value.trim(); }; $('#bdate', c).onchange = function () { bk.date = this.value; }; $('#btour', c).onchange = function () { bk.tour = this.value; }; $('#bpaid', c).onchange = function () { bk.amountPaid = this.value; }; $('#bpay', c).onchange = function () { bk.paymentType = this.value; };
+    var dl = $('#tours', c); var seen = {}; S.bookings.concat([]).forEach(function (o) { if (o.tour && !seen[o.tour]) { seen[o.tour] = 1; dl.appendChild(el('<option value="' + esc(o.tour) + '">')); } });
+    ['A Multi-Vineyard & Winery Tasting Experience', 'The Terroir of the Verde Valley Wine Trail', 'Alcantara Estate Vineyards Tasting Experience', '3-Hour Tasting Adventure', '4-Hour SIP & Savor Tour', '5-Hour Wine, Beer & Beyond Experience', 'Sedona & Verde Valley Tour: Wine, Beer, Raw Chocolate, & Lunch', 'Sedona Magical Vortex Tour', 'Scenic Sedona, Ancient Indian Ruins, & Historic Jerome', 'Vines & Vistas: Kayak and Wine Experience', 'Date Night with Dinner', 'Chapels, Where The Rivers Meet, & Wine', 'The Flavors of Historic Jerome', 'A Taste of "Old Town" Cottonwood', 'Shuttle'].forEach(function (t) { if (!seen[t]) dl.appendChild(el('<option value="' + esc(t) + '">')); });
+  }
+  $('#bcust', c).value = bk.customer; $('#ba', c).value = bk.adults; $('#bk', c).value = bk.kids; $('#bp', c).value = bk.pets; $('#bpick', c).value = bk.pickupLocation; $('#btd', c).value = bk.tourDetails; $('#bcd', c).value = bk.customerDetails;
+  $('#bcust', c).onchange = function () { bk.customer = this.value; }; $('#ba', c).onchange = function () { bk.adults = this.value; }; $('#bk', c).onchange = function () { bk.kids = this.value; }; $('#bp', c).onchange = function () { bk.pets = this.value; }; $('#bpick', c).onchange = function () { bk.pickupLocation = this.value; };
+  $('#btd', c).oninput = function () { bk.tourDetails = this.value; if (i === 0 && R.division === 'SIP Sedona') R.bookings.forEach(function (o, j) { if (j > 0 && (!o.tourDetails || o._copied)) { o.tourDetails = bk.tourDetails; o._copied = true; var ta = $$('.booking')[j] && $('#btd', $$('.booking')[j]); if (ta) ta.value = o.tourDetails; } }); };
+  $('#bcd', c).oninput = function () { bk.customerDetails = this.value; };
+  // expenses
+  var expEl = $('#exp', c);
+  function drawExp() {
+    expEl.innerHTML = '';
+    bk.expenses.forEach(function (x, j) {
+      var line = el('<div class="line"><select></select><input type="number" step="0.01" inputmode="decimal" placeholder="$"><select><option>Company Card</option><option>Cash</option></select><button class="x">×</button></div>');
+      var vs = $$('select', line)[0]; vs.appendChild(el('<option value="">Vendor…</option>')); B.vendors.forEach(function (vd) { vs.appendChild(el('<option' + (x.vendor === vd.name ? ' selected' : '') + '>' + esc(vd.name) + '</option>')); }); vs.appendChild(el('<option value="__other"' + (x.other ? ' selected' : '') + '>Other (type a new vendor)</option>'));
+      vs.onchange = function () { if (vs.value === '__other') { var nm = prompt('Vendor name'); if (nm) { x.vendor = nm.trim(); x.other = true; api({ action: 'vendorRequest', name: nm.trim() }).catch(function () { }); vs.insertBefore(el('<option selected>' + esc(nm.trim()) + '</option>'), vs.lastChild); } else { vs.value = ''; } } else { x.vendor = vs.value; x.other = false; } };
+      var amt = $$('input', line)[0]; amt.value = x.amount || ''; amt.onchange = function () { x.amount = this.value; };
+      var pw = $$('select', line)[1]; pw.value = x.paidWith || 'Company Card'; pw.onchange = function () { x.paidWith = this.value; };
+      $('.x', line).onclick = function () { bk.expenses.splice(j, 1); drawExp(); };
+      expEl.appendChild(line);
+    });
+  }
+  drawExp(); $('#addexp', c).onclick = function () { bk.expenses.push({ vendor: '', amount: '', paidWith: 'Company Card' }); drawExp(); };
+  // tips
+  var bi = $('#builtin', c);
+  if (Number(bk.builtInFromFH) > 0) bi.appendChild(el('<div class="okbox">Built-in gratuity from FareHarbor: <b>' + money(bk.builtInFromFH) + '</b> — added to your payroll automatically.</div>'));
+  var tipsEl = $('#tips', c);
+  function drawTips() {
+    tipsEl.innerHTML = '';
+    bk.tips.forEach(function (t, j) {
+      var line = el('<div class="line tip"><select></select><input type="number" step="0.01" inputmode="decimal" placeholder="$"><button class="x">×</button></div>');
+      var ms = $('select', line); B.tipMethods.forEach(function (m) { if (m === 'Built-in Gratuity' && Number(bk.builtInFromFH) > 0) return; ms.appendChild(el('<option' + (t.method === m ? ' selected' : '') + '>' + esc(m) + '</option>')); });
+      t.method = t.method || ms.value; ms.onchange = function () { t.method = ms.value; };
+      var amt = $('input', line); amt.value = t.amount || ''; amt.onchange = function () { t.amount = this.value; };
+      $('.x', line).onclick = function () { bk.tips.splice(j, 1); drawTips(); };
+      tipsEl.appendChild(line);
+    });
+  }
+  drawTips(); $('#addtip', c).onclick = function () { bk.tips.push({ method: 'Cash', amount: '' }); drawTips(); };
+  return c;
+}
+
+function validate(R) {
+  var errs = [];
+  if (!R.division) errs.push('Choose the company division.');
+  if (!R.startTime || !R.finishTime) errs.push('Enter the actual start and finish times.');
+  if (!R.bookedHours) errs.push('Enter the booked tour length in hours.');
+  if (!R.fotaflo) errs.push('Answer the Fotaflo question.');
+  R.bookings.forEach(function (b, i) {
+    var n = R.bookings.length > 1 ? 'Booking ' + (i + 1) + ': ' : '';
+    if (!b.customer) errs.push(n + 'client name is required.');
+    if (b.adults === '' || b.adults == null) errs.push(n + 'number of adults is required.');
+    if (!String(b.tourDetails || '').trim()) errs.push(n + 'tour details are required.');
+    if (!String(b.customerDetails || '').trim()) errs.push(n + 'customer details are required.');
+    if (b.manual && !b.tour) errs.push(n + 'tour name is required.');
+    (b.expenses || []).forEach(function (x) { if ((x.vendor && !x.amount) || (!x.vendor && x.amount)) errs.push(n + 'each expense needs a vendor and an amount.'); });
+    (b.tips || []).forEach(function (t) { if (!t.amount) errs.push(n + 'each tip line needs an amount (or remove it).'); });
+  });
+  return errs;
+}
+
+function submitRun(btn, errBox) {
+  var R = S.run; var errs = validate(R);
+  if (errs.length) { errBox.innerHTML = '<div class="err">' + errs.map(esc).join('<br>') + '</div>'; errBox.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Saving…';
+  var payload = JSON.parse(JSON.stringify(R));
+  payload.bookings.forEach(function (b) { b.expenses = b.expenses.filter(function (x) { return x.vendor && x.amount; }); b.tips = b.tips.filter(function (t) { return t.amount; }); delete b._copied; });
+  var req = S.editing ? { action: 'archiveAndResubmit', submissionId: S.editing.submissionId, payload: payload } : { action: 'submit', payload: payload };
+  api(req).then(function (d) { S.result = d; S.editing = null; S.run = null; S.view = 'done'; window.scrollTo(0, 0); render(); })
+    .catch(function (e) { errBox.innerHTML = '<div class="err">' + esc(e.message) + '</div>'; btn.disabled = false; btn.textContent = 'Submit tour'; });
+}
+
+function doneView() {
+  var d = S.result || {};
+  var v = el('<div><div class="card"><h2 style="color:var(--ok)">Recorded — thank you!</h2><div class="okbox"><div>Hours paid for this tour: <b>' + esc(d.hoursPaid) + '</b>' + (d.otHours ? ' (includes ' + d.otHours + ' hr billable overtime)' : '') + (d.zoneHours ? ' + ' + d.zoneHours + ' hr pickup-area time' : '') + '</div>' +
+    (d.payroll || []).map(function (p) { return '<div class="muted">' + esc(p.name) + ': ' + p.hoursPaid + ' hrs' + (p.charged ? ', charged tips ' + money(p.charged) : '') + (p.cash ? ', cash reimbursed ' + money(p.cash) : '') + '</div>'; }).join('') + '</div>' +
+    (d.alerts ? '<p class="muted">Jim has been alerted about ' + d.alerts + ' item(s) to charge.</p>' : '') + '<p class="muted">Reference ' + esc(d.submissionId) + '</p><button class="btn" id="again">Record another tour</button></div></div>');
+  $('#again', v).onclick = function () { loadHome(); };
+  return v;
+}
+
+// ------------------------------------------------------------ boot
+$('#signout').onclick = function () { S.session = null; try { localStorage.removeItem('swt_session'); } catch (e) { } S.view = 'login'; render(); };
+(function init() {
+  try { var s = localStorage.getItem('swt_session'); if (s) S.session = JSON.parse(s); } catch (e) { }
+  api({ action: 'guideNames' }).then(function (names) { if (names && names.length) S.guideNames = names; if (S.view === 'login') render(); }).catch(function () { });
+  if (S.session) loadHome(); else render();
+})();
+</script>
+</body>
+</html>

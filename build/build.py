@@ -254,6 +254,9 @@ def build():
         (OUT / p["slug"]).write_text(html)
     for f in ("htaccess.txt", "contact.php"):
         shutil.copy(HERE / f, OUT / (".htaccess" if f == "htaccess.txt" else f))
+    # guide post-tour form (static, served at /guide/)
+    if (HERE / "guide").exists():
+        shutil.copytree(HERE / "guide", OUT / "guide", dirs_exist_ok=True)
     # blog
     from blog import load_posts, post_body, index_body, post_schema, feed_xml, nice_date
     posts = load_posts()
@@ -272,7 +275,7 @@ def build():
     urls += f"<url><loc>{SITE}/blog</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>"
     urls += "".join(f"<url><loc>{SITE}{'/' if p['slug']=='index.html' else clean(p['slug'])}</loc><changefreq>monthly</changefreq><priority>{'1.0' if p['slug']=='index.html' else '0.8'}</priority></url>" for p in pages)
     (OUT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>')
-    (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
+    (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /guide/\nSitemap: {SITE}/sitemap.xml\n")
     (OUT / "404.html").write_text(cleanify(page(slug="404.html", title="Page not found | Sedona Wine Tours", description="That page isn't here — head back to Sedona Wine Tours.", body='<section><div class="wrap"><h1>That trail doesn\'t go anywhere.</h1><p class="lede">The page you were after has moved or never existed. Head back home, or call us at <a href="tel:+19285042445">(928) 504-2445</a> and we\'ll point you in the right direction.</p><p><a class="btn btn-primary" href="index.html">Back to Sedona Wine Tours</a></p></div></section>', schema=[], current="index.html")))
     build_preview(pages)
     print("built", [p["slug"] for p in pages])
