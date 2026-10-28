@@ -1,6 +1,6 @@
 ---
 title: "Sedona to Grand Canyon Day Trip: Routes, Drive Times and 2026 Tips"
-description: "Planning a Sedona to Grand Canyon day trip? Real drive times, the best route, 2026 fees, and what is open and closed at the South Rim this fall."
+description: "Sedona to the Grand Canyon is about 110 miles, 2 to 2.25 hours each way. Our day-trip route, real drive times, 2026 fees and what is open at the South Rim."
 date: 2026-10-05
 author: Jim Reich
 category: Arizona road trips
