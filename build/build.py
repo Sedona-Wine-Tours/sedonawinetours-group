@@ -25,6 +25,16 @@ if(/^tel:/.test(h))gtag('event','phone_click',{{link_url:h}});
 else if(/fareharbor\\.com/.test(h))gtag('event','begin_checkout',{{link_url:h}});
 else if(/winetoursofsedona\\.com|sipsedona\\.com|sedonawineadventures\\.com/.test(h))gtag('event','division_click',{{link_url:h}});}},true);</script>'''
 
+# Meta Pixel — the common "Wine Tours Of Sedona" dataset (1290521038171073) used on all four division
+# sites; FareHarbor fires Purchase (with Conversions API) from the booking confirmation page, so this
+# page only sends PageView plus InitiateCheckout when a FareHarbor booking link is clicked.
+META_PIXEL_ID = "1290521038171073"
+META_PIXEL = f'''<script>!function(f,b,e,v,n,t,s){{if(f.fbq)return;n=f.fbq=function(){{n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)}};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','{META_PIXEL_ID}');fbq('track','PageView');
+document.addEventListener('click',function(e){{var a=e.target.closest&&e.target.closest('a[href]');if(a&&/fareharbor\\.com/.test(a.getAttribute('href')))fbq('track','InitiateCheckout');}},true);</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id={META_PIXEL_ID}&ev=PageView&noscript=1" alt=""></noscript>'''
+GA4 = GA4 + "\n" + META_PIXEL
+
 CSS = (HERE / "styles.css").read_text() + __import__("reviews").REVIEWS_CSS + __import__("social").SOCIAL_CSS
 CSS_VER = __import__("hashlib").md5(CSS.encode()).hexdigest()[:8]
 

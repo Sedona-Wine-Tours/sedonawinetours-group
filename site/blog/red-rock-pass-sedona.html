@@ -10,6 +10,10 @@ document.addEventListener('click',function(e){var a=e.target.closest&&e.target.c
 if(/^tel:/.test(h))gtag('event','phone_click',{link_url:h});
 else if(/fareharbor\.com/.test(h))gtag('event','begin_checkout',{link_url:h});
 else if(/winetoursofsedona\.com|sipsedona\.com|sedonawineadventures\.com/.test(h))gtag('event','division_click',{link_url:h});},true);</script>
+<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','1290521038171073');fbq('track','PageView');
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href]');if(a&&/fareharbor\.com/.test(a.getAttribute('href')))fbq('track','InitiateCheckout');},true);</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1290521038171073&ev=PageView&noscript=1" alt=""></noscript>
 <title>Red Rock Pass Sedona: Where You Need One, What It Costs, 2026 Tips | Sedona Wine Tours Blog</title>
 <meta name="description" content="Do you need a Red Rock Pass in Sedona? Where it's required, current prices, where to buy it, which passes count instead, and the spots where it doesn't apply.">
 <link rel="canonical" href="https://www.sedonawinetours.group/blog/red-rock-pass-sedona">
