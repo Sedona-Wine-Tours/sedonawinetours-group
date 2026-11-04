@@ -86,6 +86,18 @@ function money(n) { return '$' + (Number(n) || 0).toFixed(2); }
 function todayStr(off) { var d = new Date(Date.now() - (off || 0) * 86400000); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
 function niceDate(ymd) { if (!ymd) return ''; var p = ymd.split('-'); var d = new Date(p[0], p[1] - 1, p[2]); return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); }
 function to24(t) { if (!t) return ''; var m = String(t).match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i); if (!m) return ''; var h = +m[1]; if (m[3]) { if (/pm/i.test(m[3]) && h < 12) h += 12; if (/am/i.test(m[3]) && h === 12) h = 0; } return ('0' + h).slice(-2) + ':' + m[2]; }
+// Google Sheets can hand back a time cell as a full date on Dec 30, 1899 ("Sat Dec 30 1899 13:00:00 GMT-0700 ..." or "1899-12-30T20:00:00.000Z").
+// Keep only the clock time, shown as "1:00 PM", so no 1899 date ever reaches the form.
+function cleanTime(t) {
+  if (t == null || t === '') return '';
+  var s = String(t);
+  if (/1899|GMT|T\d{2}:\d{2}:\d{2}/.test(s)) {
+    var iso = s.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
+    if (iso) { var d = new Date(s); if (!isNaN(d)) { var h = (d.getUTCHours() + 17) % 24; return to12(('0' + h).slice(-2) + ':' + ('0' + d.getUTCMinutes()).slice(-2)); } } // Arizona is always UTC-7
+    var m = s.match(/\b(\d{1,2}):(\d{2})(?::\d{2})?\b/); return m ? to12(('0' + m[1]).slice(-2) + ':' + m[2]) : '';
+  }
+  return s;
+}
 function to12(t) { if (!t) return ''; var p = t.split(':'); var h = +p[0]; var ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return h + ':' + p[1] + ' ' + ap; }
 function addHours(t, h) { if (!t) return ''; var p = t.split(':'); var mins = (+p[0]) * 60 + (+p[1]) + Math.round(h * 60); mins = ((mins % 1440) + 1440) % 1440; return ('0' + Math.floor(mins / 60)).slice(-2) + ':' + ('0' + (mins % 60)).slice(-2); }
 function minsBetween(a, b) { if (!a || !b) return 0; var pa = a.split(':'), pb = b.split(':'); return ((+pb[0]) * 60 + (+pb[1])) - ((+pa[0]) * 60 + (+pa[1])); }
@@ -120,7 +132,7 @@ function loginView() {
 function loadHome() {
   S.view = 'home'; S.loading = true; render();
   return Promise.all([api({ action: 'bootstrap' }), api({ action: 'bookings', days: 2 }), api({ action: 'mine' })]).then(function (r) {
-    S.boot = r[0]; S.bookings = r[1].bookings; S.window = r[1]; S.mine = r[2]; S.loading = false; render();
+    S.boot = r[0]; S.bookings = (r[1].bookings || []).map(function (b) { b.start = cleanTime(b.start); b.end = cleanTime(b.end); return b; }); S.window = r[1]; S.mine = r[2]; S.loading = false; render();
   }).catch(function (e) { S.loading = false; if (/signed in/i.test(e.message)) { S.session = null; S.view = 'login'; } S.error = e.message; render(); });
 }
 

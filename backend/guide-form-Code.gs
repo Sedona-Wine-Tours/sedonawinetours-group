@@ -38,6 +38,14 @@ function now() { return new Date(); }
 function fmtDate(d) { return Utilities.formatDate(d, TZ, 'EEE, MMM d, yyyy'); }
 function iso(d) { return Utilities.formatDate(d, TZ, "yyyy-MM-dd'T'HH:mm:ss"); }
 function ymd(d) { return Utilities.formatDate(d, TZ, 'yyyy-MM-dd'); }
+/** Sheets turns "1:00 PM" into a time cell, which Apps Script reads back as a Dec 30, 1899 date.
+ *  Always hand the form and the Command Center the clock time only ("1:00 PM", or "13:00" with fmt 'HH:mm'). */
+function timeStr(v, fmt) {
+  if (v instanceof Date) return Utilities.formatDate(v, ss().getSpreadsheetTimeZone() || TZ, fmt || 'h:mm a');
+  var s = String(v == null ? '' : v); var m = s.match(/\b(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i);
+  if (/1899|GMT/.test(s) && m) { var h = +m[1]; return fmt === 'HH:mm' ? ('0' + h).slice(-2) + ':' + m[2] : (h % 12 || 12) + ':' + m[2] + ' ' + (h >= 12 ? 'PM' : 'AM'); }
+  return s;
+}
 function round2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
 function roundQuarter(h) { return Math.round((Number(h) || 0) * 4) / 4; }
 function num(v) { if (v === '' || v === null || v === undefined) return 0; var n = Number(String(v).replace(/[$,]/g, '')); return isNaN(n) ? 0 : n; }
@@ -172,7 +180,9 @@ function fhUpsert(list) {
       b.adults || 0, b.kids || 0, b.pets || 0, b.pickup || '', num(b.amountPaid), num(b.subtotal), num(b.builtIn), num(b.bookingFee), num(b.taxes), b.ref || '', b.bookedAt || '', iso(now()),
       JSON.stringify({ end: b.end || '', paymentType: b.paymentType || '', crew: b.crew || '', notes: b.notes || '', customerTypes: b.customerTypes || '' })];
     var r = idx[String(b.bookingId)];
-    if (r) s.getRange(r, 1, 1, row.length).setValues([row]); else { s.appendRow(row); idx[String(b.bookingId)] = s.getLastRow(); }
+    if (!r) { r = s.getLastRow() + 1; idx[String(b.bookingId)] = r; }
+    s.getRange(r, 4).setNumberFormat('@');   // Start Time stays text, never a Dec 30, 1899 time cell
+    s.getRange(r, 1, 1, row.length).setValues([row]);
     n++;
   });
   return { upserted: n };
@@ -252,7 +262,7 @@ function bookingsForForm(g, days) {
   var rows = tableRows(sh(TAB.fh)).map(function (r) {
     var raw = {}; try { raw = JSON.parse(r['Raw'] || '{}'); } catch (e) { }
     var d = r['Tour Date'] instanceof Date ? ymd(r['Tour Date']) : String(r['Tour Date']).slice(0, 10);
-    return { bookingId: String(r['Booking ID']), status: String(r['Status']), date: d, start: String(r['Start Time']), end: raw.end || '', duration: num(r['Duration (hrs)']),
+    return { bookingId: String(r['Booking ID']), status: String(r['Status']), date: d, start: timeStr(r['Start Time']), end: raw.end || '', duration: num(r['Duration (hrs)']),
       division: String(r['Division']), tour: String(r['Item / Tour']), customer: String(r['Customer Name']), email: String(r['Email']), phone: String(r['Phone']),
       adults: num(r['Adults']), kids: num(r['Kids']), pets: num(r['Pets']), pickup: String(r['Pickup Location']), amountPaid: num(r['Amount Paid']), subtotal: num(r['Subtotal']),
       builtIn: num(r['Built-in Gratuity']), ref: String(r['Booking Source']), paymentType: raw.paymentType || '', crew: raw.crew || '', recorded: recorded[String(r['Booking ID'])] || null };
@@ -390,7 +400,9 @@ function submit(g, P) {
     row[CD.guidePayTotal - 1] = x.guidePayShare; row[CD.pickupTotal - 1] = x.pickupShare; row[CD.fiveStar - 1] = 0; row[CD.totalExp - 1] = x.totalExp; row[CD.net - 1] = x.net;
     row[CD.fotaflo - 1] = P.fotaflo || ''; row[CD.photos - 1] = ''; row[CD.emailed - 1] = ''; row[CD.submittedBy - 1] = g.name; row[CD.submittedAt - 1] = stamp; row[CD.source - 1] = 'Guide Form'; row[CD.subId - 1] = subId;
     for (var i = 0; i < CD.subId; i++) if (row[i] === undefined) row[i] = '';
-    cdSheet.appendRow(row);
+    var cr = cdSheet.getLastRow() + 1;
+    cdSheet.getRange(cr, CD.start, 1, 2).setNumberFormat('@');   // Start/Finish stay text (no 1899 dates)
+    cdSheet.getRange(cr, 1, 1, row.length).setValues([row]);
     upsertCustomer(b, P, x, dateObj);
   });
   // payroll lines (one per paid guide per run)
@@ -580,7 +592,7 @@ function toursForMonth(month) {
   for (var i = 1; i < v.length; i++) {
     var d = v[i][CD.date - 1]; if (!(d instanceof Date)) continue; if (Utilities.formatDate(d, TZ, 'yyyy-MM') !== month) continue;
     out.push({ recordId: v[i][CD.id - 1], date: ymd(d), bookingId: String(v[i][CD.bookingId - 1]), division: v[i][CD.division - 1], tour: v[i][CD.tour - 1], guide: v[i][CD.guide - 1], guide2: v[i][CD.guide2 - 1], trainee: v[i][CD.trainee - 1],
-      clients: v[i][CD.clients - 1], adults: v[i][CD.adults - 1], kids: v[i][CD.kids - 1], pets: v[i][CD.pets - 1], start: v[i][CD.start - 1], finish: v[i][CD.finish - 1], hours: v[i][CD.actualHrs - 1], otYN: v[i][CD.otYN - 1], otAmt: v[i][CD.otAmt - 1],
+      clients: v[i][CD.clients - 1], adults: v[i][CD.adults - 1], kids: v[i][CD.kids - 1], pets: v[i][CD.pets - 1], start: timeStr(v[i][CD.start - 1], 'HH:mm'), finish: timeStr(v[i][CD.finish - 1], 'HH:mm'), hours: v[i][CD.actualHrs - 1], otYN: v[i][CD.otYN - 1], otAmt: v[i][CD.otAmt - 1],
       revenue: v[i][CD.revenue - 1], tip: v[i][CD.tip - 1], tipMethod: v[i][CD.tipMethod - 1], tourDetails: v[i][CD.tourDetails - 1], customerDetails: v[i][CD.custDetails - 1], expenses: v[i][CD.expItem - 1], totalExp: v[i][CD.totalExp - 1], net: v[i][CD.net - 1], fotaflo: v[i][CD.fotaflo - 1], submittedBy: v[i][CD.submittedBy - 1], subId: v[i][CD.subId - 1] });
   }
   return { month: month, tours: out.reverse(), sheetUrl: ss().getUrl() + '#gid=' + sh(TAB.cd).getSheetId() };
