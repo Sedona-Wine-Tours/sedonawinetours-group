@@ -2,6 +2,7 @@
 title: "Sedona in November: Weather, Crowds, Fall Color and What to Do"
 description: "Planning Sedona in November? Here's the real weather, where fall color lingers, 2026 event dates, park fees and hours, and how we'd spend the days."
 date: 2026-10-03
+updated: 2026-11-04
 author: Jim Reich
 category: Planning & logistics
 keywords: [Sedona in November, Sedona weather in November, Sedona fall colors, things to do in Sedona in November, Sedona Thanksgiving, Verde Valley wineries in fall]
@@ -19,6 +20,8 @@ sources:
 Sedona in November is one of our favorite months of the whole year: sunny afternoons in the 60s, cold clear nights, the last of the fall color along Oak Creek, and noticeably thinner crowds once October's rush winds down. If you can only remember one thing, pack layers and plan your outdoor time for the middle of the day, because the sun sets early and the temperature drops fast when it does.
 
 We've been guiding guests around Sedona and the Verde Valley since 2004, and November is the month we tell our own friends and family to come. Here's what it's actually like, what's open, what it costs, and how we'd put the days together.
+
+**Update, November 4:** State Route 89A through Oak Creek Canyon is closed in both directions between Sedona and Kachina Village after early-November flooding, with no reopening time announced yet. Creekside stops in the canyon, including Slide Rock State Park, may be restricted until it reopens. [Visit Sedona's travel advisory](https://visitsedona.com/sedona-flooding-update-road-closures-evacuations-and-travel-advisories/) asks visitors to stay out of Oak Creek for now; check [AZ 511](https://www.az511.gov/) before you drive. Uptown Sedona, Tlaquepaque and the Verde Valley wineries are open.
 
 ## Sedona weather in November: what to expect
 

@@ -2,6 +2,7 @@
 title: "Slide Rock State Park in Fall and Winter: Hours, Fees, Can You Swim?"
 description: "Slide Rock State Park in fall and winter: current hours, $20 and $10 vehicle fees, swim area status after the Pocket Fire, dog rules and how to time a visit."
 date: 2026-10-23
+updated: 2026-11-04
 author: Jim Reich
 category: Outdoors & parks
 keywords: [Slide Rock State Park, Slide Rock State Park hours, Slide Rock State Park fees, can you swim at Slide Rock, Slide Rock in winter, Oak Creek Canyon fall, Slide Rock dogs]
@@ -19,6 +20,8 @@ sources:
 Slide Rock State Park is open this fall, it is cheaper and far less crowded than in summer, and the old apple orchard and canyon walls are at their best from late October into November. The catch is the water: after this summer's Pocket Fire and the flash floods that followed, the swim area has been closed or under a stay-out advisory for stretches of the season, so check the park's alerts the morning you go. Here is what we tell our own guests about hours, fees, swimming, dogs and timing for a fall or winter visit.
 
 We have been driving guests past the Slide Rock entrance on 89A since 2004, and the off-season version of this park is the one we like best.
+
+**Update, November 4:** State Route 89A through Oak Creek Canyon is closed in both directions between Sedona and Kachina Village after early-November flooding, with no reopening time announced yet. Slide Rock sits inside that closure, so call the park or check [Arizona State Parks](https://azstateparks.com/slide-rock) before you plan a visit, and treat what follows as your guide for once it reopens. [Visit Sedona's travel advisory](https://visitsedona.com/sedona-flooding-update-road-closures-evacuations-and-travel-advisories/) asks visitors to stay out of Oak Creek for now; check [AZ 511](https://www.az511.gov/) before you drive. Uptown Sedona, Tlaquepaque and the Verde Valley wineries are open.
 
 ## Slide Rock State Park basics: where it is and how entry works
 

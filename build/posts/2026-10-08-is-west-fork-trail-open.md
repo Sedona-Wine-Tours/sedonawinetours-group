@@ -1,35 +1,40 @@
 ---
-title: "Is West Fork Trail Open? Sedona's Fall 2026 Closure and Alternatives"
-description: "West Fork Trail near Sedona is closed through October 31, 2026 after the Pocket Fire. Here is what the order covers and where to find fall color instead."
+title: "Is West Fork Trail Open? Sedona Closure Through Feb 2027 and Alternatives"
+description: "No. West Fork Trail near Sedona is closed through February 27, 2027 while the Forest Service clears flood debris. What the order covers and where to go instead."
 date: 2026-10-08
+updated: 2026-11-04
 author: Jim Reich
 category: Outdoors & parks
-keywords: [is West Fork Trail open, West Fork Trail closure, West Fork Oak Creek fall colors, Sedona fall colors 2026, Oak Creek Canyon fall color, Sedona fall hikes, Pocket Fire trail closures]
+keywords: [is West Fork Trail open, is West Fork Trail open today, West Fork Trail closed, West Fork Trail closure, West Fork Oak Creek fall colors, Sedona fall colors 2026, Oak Creek Canyon fall color, Sedona fall hikes, Pocket Fire trail closures]
 sources:
   - {title: "Coconino National Forest: West Fork Temporary Area Closure - Extended", url: "https://www.fs.usda.gov/r03/coconino/alerts/west-fork-temporary-area-closure-extended"}
   - {title: "Coconino National Forest: Oak Creek temporary area closure lifts this week", url: "https://www.fs.usda.gov/r03/coconino/newsroom/releases/oak-creek-temporary-area-closure-lifts-week"}
+  - {title: "KJZZ: Sedona West Fork trail closed for debris cleanup from flooding (Oct 28, 2026)", url: "https://www.kjzz.org/fronteras-desk/2026-10-28/west-fork-sedona-trail-closed-for-debris-cleanup-from-flooding"}
   - {title: "Coconino National Forest: West Fork Trail No. 108", url: "https://www.fs.usda.gov/r03/coconino/recreation/trails/west-fork-trail-no-108"}
   - {title: "Coconino National Forest: Alerts", url: "https://www.fs.usda.gov/r03/coconino/alerts"}
   - {title: "Visit Sedona: Where to See Arizona Fall Leaves", url: "https://visitsedona.com/blog/where-to-see-arizona-fall-leaves/"}
   - {title: "Visit Sedona: Trail & Creek Closures Update", url: "https://visitsedona.com/pocket-fire/"}
+  - {title: "Visit Sedona: Sedona Flooding Update: Road Closures, Evacuations and Travel Advisories (Nov 3, 2026)", url: "https://visitsedona.com/sedona-flooding-update-road-closures-evacuations-and-travel-advisories/"}
   - {title: "Arizona State Parks: Slide Rock State Park", url: "https://azstateparks.com/slide-rock"}
   - {title: "Arizona State Parks: Red Rock State Park", url: "https://azstateparks.com/red-rock"}
 ---
 
-If you are asking "is West Fork Trail open?" before a fall trip to Sedona, the answer right now is no. The Coconino National Forest has closed West Fork Trail No. 108 and the West Fork drainage through October 31, 2026, because of flood and rockfall hazards left behind by this summer's Pocket Fire. The good news is that the rest of Oak Creek Canyon is open, the leaves are turning on schedule, and there are several very good places to see them.
+If you are asking "is West Fork Trail open?" before a fall trip to Sedona, the answer right now is no. The Coconino National Forest has extended its closure of West Fork Trail No. 108 and the West Fork drainage through February 27, 2027. Heavy rain in late October moved large boulders and debris across the trail, on top of the flood and rockfall risk left by this summer's Pocket Fire. The good news is that the rest of Oak Creek Canyon is open, the leaves are turning on schedule, and there are several very good places to see them.
 
-We have been sending guests up to West Fork every October since 2004, so we know how many fall trips are planned around that one hike. Here is what we know as of October 8, and what we are telling our own guests to do instead.
+We have been sending guests up to West Fork every October since 2004, so we know how many fall trips are planned around that one hike. Here is what we know as of November 4, and what we are telling our own guests to do instead.
+
+**Update, November 4:** State Route 89A through Oak Creek Canyon is closed in both directions between Sedona and Kachina Village after early-November flooding, and no reopening time has been announced. Creekside sites in the canyon, including Slide Rock State Park, may be restricted, and [Visit Sedona](https://visitsedona.com/sedona-flooding-update-road-closures-evacuations-and-travel-advisories/) asks visitors to stay out of Oak Creek for now. Check [AZ 511](https://www.az511.gov/) before you drive and treat the canyon stops below as "once it reopens." Uptown Sedona, Tlaquepaque and the Verde Valley wineries are open.
 
 ## Is West Fork Trail open right now?
 
-No. The Forest Service's current order, titled [West Fork Temporary Area Closure - Extended](https://www.fs.usda.gov/r03/coconino/alerts/west-fork-temporary-area-closure-extended), took effect September 26, 2026 and runs through 11:59 p.m. on October 31, 2026, unless the forest rescinds it earlier. It covers:
+No. The Forest Service's current order, titled [West Fork Temporary Area Closure - Extended](https://www.fs.usda.gov/r03/coconino/alerts/west-fork-temporary-area-closure-extended), was extended again in late October and now runs through February 27, 2027, unless the forest rescinds it earlier. It covers:
 
 - The entire West Fork Trail (No. 108) inside the Red Rock-Secret Mountain Wilderness
 - All National Forest land within 100 feet of the West Fork of Oak Creek drainage, from Forest Road 231 at the top down to the wilderness boundary
 
 In plain terms, that is the whole hike, from the first creek crossing to the far end of the canyon. This is a formal closure order rather than a suggestion, and rangers do enforce it, so please do not plan on slipping in from the Call of the Canyon side or dropping in from the top.
 
-The original closure was set to end October 1. It was extended by a month, so we would not assume November 1 is a firm reopening date either. Before you drive up the canyon, check the [Coconino National Forest alerts page](https://www.fs.usda.gov/r03/coconino/alerts) or call the Red Rock Ranger District at 928-203-2900.
+The closure was first set to end October 1, then October 31. After the late-October rain, the Forest Service said trail work, possible rerouting, debris removal and a consultation with the U.S. Fish & Wildlife Service all need to happen before West Fork reopens, so we would not count on it before spring. Before you drive up the canyon, check the [Coconino National Forest alerts page](https://www.fs.usda.gov/r03/coconino/alerts) or call the Red Rock Ranger District at 928-203-2900.
 
 ## Why West Fork is closed
 
@@ -39,9 +44,9 @@ In mid-September the Forest Service [announced](https://www.fs.usda.gov/r03/coco
 
 It is a disappointment in October, but we think it is the right call, and the canyon will be better for the rest.
 
-## What is open in Oak Creek Canyon this fall
+## Oak Creek Canyon once 89A reopens
 
-Almost everything else. State Route 89A is open the whole way between Sedona and Flagstaff, and the drive is the main event anyway. The same bigtooth maples, boxelders, velvet ash and willows that make West Fork famous grow all along the main canyon, and [Visit Sedona](https://visitsedona.com/blog/where-to-see-arizona-fall-leaves/) notes that peak color usually runs from mid-October well into November.
+When the highway reopens, the drive between Sedona and Flagstaff is the main event anyway. The same bigtooth maples, boxelders, velvet ash and willows that make West Fork famous grow all along the main canyon, and [Visit Sedona](https://visitsedona.com/blog/where-to-see-arizona-fall-leaves/) notes that peak color usually runs from mid-October well into November.
 
 A few stops we like, heading north from Uptown:
 
@@ -65,7 +70,7 @@ These two Forest Service trails reach Oak Creek just north of Uptown, and leashe
 
 ### Flagstaff's aspens
 
-If you want a wall of gold, keep driving. Flagstaff is about 30 miles up 89A, and the aspens on the San Francisco Peaks turn earlier than anything in Sedona, typically from late September into mid-October, so go soon. One more closure to know about: the Forest Service lists Lockett Meadow Road (Forest Road 552) as temporarily closed for maintenance, which affects the popular Inner Basin approach. The Snowbowl Road side of the mountain is the easier bet this year.
+If you want a wall of gold, keep driving. Flagstaff is about 30 miles up 89A (use I-17 while the canyon road is closed), and the aspens on the San Francisco Peaks turn earlier than anything in Sedona, typically from late September into mid-October, so by November they are mostly bare; save this one for next fall. One more closure to know about: the Forest Service lists Lockett Meadow Road (Forest Road 552) as temporarily closed for maintenance, which affects the popular Inner Basin approach. The Snowbowl Road side of the mountain is the easier bet this year.
 
 ### Lower Oak Creek and the Verde Valley
 
@@ -80,8 +85,8 @@ This is our home turf, and it is the part of the season most visitors miss. Oak 
 - **Fees:** A card and some exact-change cash cover the state parks. National Forest trailheads around Sedona generally need a Red Rock Pass.
 - **Check before you drive:** The [Forest Service alerts page](https://www.fs.usda.gov/r03/coconino/alerts) for closures, and the [West Fork trail page](https://www.fs.usda.gov/r03/coconino/recreation/trails/west-fork-trail-no-108) for reopening news.
 
-## If West Fork reopens in November
+## When West Fork reopens
 
-It might. The order expires at the end of October unless it is extended again, and in a normal year there is still color in the canyon during the first week or two of November. If it does reopen, expect a rush on the first weekends, and note that Call of the Canyon, the day-use area where the hike starts, opens at 8 a.m. from October through March and has a lot that fills fast. Day use there has been $15 per vehicle for up to five people, and the Red Rock Pass and America the Beautiful pass are not accepted. Confirm current details on the Forest Service page before you go. We will update our own [fall guide](/blog/best-time-to-visit-sedona-fall) when the status changes.
+Not this fall. The order now runs through late February, and the repair work has to be finished first. When it does reopen, expect a rush on the first weekends, and note that Call of the Canyon, the day-use area where the hike starts, opens at 8 a.m. from October through March and has a lot that fills fast. Day use there has been $15 per vehicle for up to five people, and the Red Rock Pass and America the Beautiful pass are not accepted. Confirm current details on the Forest Service page before you go. We will update our own [fall guide](/blog/best-time-to-visit-sedona-fall) when the status changes.
 
 Until then, the canyon drive, the state parks and the lower creek have more than enough color to fill a day. If you would like to spend the afternoon half of it among the cottonwoods and vineyards along lower Oak Creek, our [Tour Chooser](/#chooser) will point you to the right fit.
