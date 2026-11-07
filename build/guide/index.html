@@ -189,7 +189,7 @@ function paymentCard() {
     if (errs.length) { $('#perr', c).innerHTML = '<div class="err">' + errs.map(esc).join('<br>') + '</div>'; return; }
     var btn = $('#pgo', c); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Recording';
     api({ action: 'admin', op: 'recordPayment', guide: $('#pg', c).value, amount: amt, method: $('#pm', c).value, date: $('#pd', c).value, memo: $('#pn', c).value, pin: p1 }).then(function (r) {
-      var d = r || {};
+      var d = r || {}; if (!d.paymentId) throw new Error('The payment feature is not active on the server yet. Nothing was recorded.');
       var bal = d.balanceAfter < 0 ? 'Credit of ' + money(-d.balanceAfter) + ' (paid ahead)' : 'Now owed: ' + money(d.balanceAfter);
       $('#perr', c).innerHTML = '<div class="okbox"><b>Recorded.</b> ' + esc(d.guide) + ' paid ' + money(d.amount) + ' by ' + esc(d.method) + ' on ' + esc(niceDate(d.date)) + '. ' + esc(bal) + '.' + (d.emailed ? ' Email sent to ' + esc(d.emailTo) + '.' : ' <span style="color:var(--bad)">Email not sent' + (d.emailError ? ': ' + esc(d.emailError) : (d.emailTo ? '' : ' (no email on the Guides tab)')) + '.</span>') + '</div>';
       $('#pa', c).value = ''; $('#pn', c).value = ''; $('#pp1', c).value = ''; $('#pp2', c).value = '';
