@@ -86,7 +86,7 @@ function rules() {
 }
 function guides() {
   var s = sh(TAB.guides); var rows = tableRows(s);
-  return rows.map(function (r) { return { name: String(r['Guide']).trim(), rate: num(r['Hourly Rate']), status: String(r['Status']), role: String(r['Role'] || ''), pin: String(r['PIN'] || '') }; })
+  return rows.map(function (r) { return { name: String(r['Guide']).trim(), rate: num(r['Hourly Rate']), status: String(r['Status']), role: String(r['Role'] || ''), pin: String(r['PIN'] || ''), email: String(r['Email'] || '').trim() }; })
     .filter(function (g) { return g.name; });
 }
 function vendors(includePending) {
@@ -164,6 +164,7 @@ function bootstrap(g) {
     divisions: ['Wine Tours of Sedona', 'SIP Sedona', 'Sedona Wine Adventures'],
     tipMethods: ['Cash', 'Venmo/Zelle/PayPal', 'Built-in Gratuity', "Bill Customer's Card"],
     kidChargeTours: KID_CHARGE_TOURS,
+    paymentMethods: PAYMENT_METHODS,
     sheetUrl: ss().getUrl()
   };
 }
@@ -551,6 +552,9 @@ function admin(g, p) {
   if (op === 'deleteTab') { var dt = ss().getSheetByName(p.tab); if (!dt) throw new Error('Tab not found'); ss().deleteSheet(dt); return { deleted: p.tab }; }
   if (op === 'normalizeRaw') return normalizeRaw();
   if (op === 'installTriggers') return installTriggers();
+  if (op === 'recordPayment') return recordPayment(g, p);
+  if (op === 'payments') return listPayments(p.guide);
+  if (op === 'setupPayments') return setupPayments(p);
   if (op === 'crmQueue') return crmQueue(p);
   if (op === 'crmMark') return crmMark(p);
   if (op === 'syncKey') { var pr = PropertiesService.getScriptProperties(); var k2 = pr.getProperty('SYNC_KEY'); if (!k2) { k2 = Utilities.getUuid(); pr.setProperty('SYNC_KEY', k2); } return { key: k2 }; }
@@ -596,6 +600,77 @@ function toursForMonth(month) {
       revenue: v[i][CD.revenue - 1], tip: v[i][CD.tip - 1], tipMethod: v[i][CD.tipMethod - 1], tourDetails: v[i][CD.tourDetails - 1], customerDetails: v[i][CD.custDetails - 1], expenses: v[i][CD.expItem - 1], totalExp: v[i][CD.totalExp - 1], net: v[i][CD.net - 1], fotaflo: v[i][CD.fotaflo - 1], submittedBy: v[i][CD.submittedBy - 1], subId: v[i][CD.subId - 1] });
   }
   return { month: month, tours: out.reverse(), sheetUrl: ss().getUrl() + '#gid=' + sh(TAB.cd).getSheetId() };
+}
+// ---------------------------------------------------------------- payments (Jim only)
+var PAYMENT_METHODS = ['Zelle', 'Venmo', 'Cash', 'Check', 'PayPal', 'Direct deposit'];
+var PAY_BG = '#d9ead3'; // light green 3
+function isPaymentRow(r) { var b = String(r[PR.bookingId - 1] || '').toLowerCase(), t = String(r[PR.tour - 1] || '').toUpperCase(); return b === 'payment' || b === 'pay' || t.indexOf('PAYMENT BY') === 0 || num(r[PR.payment - 1]) > 0; }
+function formatPaymentRow(s, rowNum) { var rg = s.getRange(rowNum, 1, 1, Math.max(s.getLastColumn(), PR.source)); rg.setBackground(PAY_BG).setFontWeight('bold').setFontColor('#000000'); }
+function recordPayment(g, p) {
+  if (g.name !== 'Jim') throw new Error('Only Jim can record payments');
+  if (String(p.pin || '') !== g.pin) throw new Error('PIN did not match');
+  var guide = guides().filter(function (x) { return x.name === String(p.guide || '').trim() && x.name !== 'Jim'; })[0];
+  if (!guide) throw new Error('Pick a guide');
+  var amount = round2(num(p.amount)); if (!(amount > 0)) throw new Error('Enter the amount paid');
+  var method = String(p.method || '').trim(); if (PAYMENT_METHODS.indexOf(method) < 0) throw new Error('Pick a payment method');
+  var m = String(p.date || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); if (!m) throw new Error('Enter the payment date');
+  var when = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0);
+  var memo = String(p.memo || '').trim().slice(0, 200);
+  var s = ss().getSheetByName(guide.name + ' Hours'); if (!s) throw new Error('No Hours tab for ' + guide.name);
+  // tours this payment covers: rows since the previous payment
+  var v = s.getDataRange().getValues(); var covered = [];
+  for (var j = v.length - 1; j >= 1; j--) { if (isPaymentRow(v[j])) break; if (v[j].join('') === '') continue; covered.unshift({ date: v[j][PR.date - 1] instanceof Date ? ymd(v[j][PR.date - 1]) : String(v[j][PR.date - 1]).slice(0, 10), tour: v[j][PR.tour - 1], clients: v[j][PR.clients - 1], hours: v[j][PR.hours - 1], pay: v[j][PR.pay - 1], pickup: v[j][PR.pickup - 1], charged: v[j][PR.chargedAmt - 1], cash: v[j][PR.cash - 1], totalDue: v[j][PR.totalDue - 1] }); }
+  var before = lastOwed(s);
+  var payId = uid('P'); var stamp = iso(now());
+  var row = []; for (var i = 0; i < PR.source; i++) row.push('');
+  row[PR.date - 1] = when; row[PR.bookingId - 1] = 'Payment'; row[PR.tour - 1] = 'PAYMENT BY WTOS'; row[PR.clients - 1] = method + ' Payment';
+  row[PR.blank - 1] = memo; row[PR.totalDue - 1] = 0; row[PR.payment - 1] = amount; row[PR.recordId - 1] = payId; row[PR.source - 1] = 'Guide Form ' + payId + ' | recorded by Jim ' + stamp;
+  s.appendRow(row); var rn = s.getLastRow();
+  s.getRange(rn, PR.payment).setNumberFormat('$#,##0.00'); s.getRange(rn, PR.date).setNumberFormat('EEEE, MMMM d, yyyy');
+  formatPaymentRow(s, rn);
+  recalcOwed(s);
+  var after = lastOwed(s);
+  var payload = { guide: guide.name, amount: amount, method: method, date: ymd(when), memo: memo, balanceBefore: before, balanceAfter: after };
+  sh(TAB.subs).appendRow([payId, stamp, 'Jim', 'Payment', guide.name, payId, JSON.stringify(payload), JSON.stringify({ owed: after, covered: covered.length }), 'final']);
+  var emailed = false, emailError = '';
+  try { emailed = sendPaymentEmail(guide, payload, covered); } catch (e) { emailError = String(e.message || e); }
+  return { ok: true, paymentId: payId, guide: guide.name, amount: amount, method: method, date: ymd(when), balanceBefore: before, balanceAfter: after, emailed: emailed, emailError: emailError, emailTo: guide.email };
+}
+function money(n) { n = num(n); return (n < 0 ? '-' : '') + '$' + Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function sendPaymentEmail(guide, pay, covered) {
+  if (!guide.email) return false;
+  var esc = function (x) { return String(x == null ? '' : x).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
+  var dt = Utilities.formatDate(new Date(pay.date + 'T12:00:00'), TZ, 'MMM d, yyyy');
+  var rows = covered.map(function (c) { return '<tr><td>' + esc(c.date) + '</td><td>' + esc(c.tour) + '</td><td>' + esc(c.clients) + '</td><td style="text-align:right">' + esc(c.hours) + '</td><td style="text-align:right">' + money(c.pay) + '</td><td style="text-align:right">' + money(c.pickup) + '</td><td style="text-align:right">' + money(c.totalDue) + '</td></tr>'; }).join('');
+  var balLine = pay.balanceAfter < 0 ? 'You now have a credit of <b>' + money(-pay.balanceAfter) + '</b> (I have paid ahead; your next tours will draw it down).' : 'Your new balance owed is <b>' + money(pay.balanceAfter) + '</b>.';
+  var html = '<div style="font-family:Arial,sans-serif;font-size:14px;color:#222">' +
+    '<p>Hi ' + esc(guide.name) + ',</p>' +
+    '<p>I just sent you <b>' + money(pay.amount) + '</b> by <b>' + esc(pay.method) + '</b> on ' + esc(dt) + '.' + (pay.memo ? ' Note: ' + esc(pay.memo) + '.' : '') + '</p>' +
+    '<p>Balance before this payment: ' + money(pay.balanceBefore) + '<br>' + balLine + '</p>' +
+    (rows ? '<p>Tours covered by this payment:</p><table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;border-color:#ddd;font-size:13px"><tr style="background:#f3f3f3"><th>Date</th><th>Tour</th><th>Guests/Clients</th><th>Hours</th><th>Pay</th><th>Pickup</th><th>Total due</th></tr>' + rows + '</table>' : '') +
+    '<p>Questions? Reply to this email or call (928) 504-2445.</p><p>Thanks,<br>Jim<br>Sedona Wine Tours</p></div>';
+  MailApp.sendEmail({ to: guide.email, subject: 'Payment sent: ' + money(pay.amount) + ' by ' + pay.method + ' - balance ' + money(pay.balanceAfter), htmlBody: html, name: 'Jim Reich - Sedona Wine Tours' });
+  return true;
+}
+function listPayments(guideName) {
+  var out = [];
+  guides().filter(function (g) { return g.name !== 'Jim' && (!guideName || g.name === guideName); }).forEach(function (g) {
+    var s = ss().getSheetByName(g.name + ' Hours'); if (!s) return; var v = s.getDataRange().getValues();
+    for (var i = 1; i < v.length; i++) if (isPaymentRow(v[i]) && num(v[i][PR.payment - 1]) > 0) out.push({ guide: g.name, date: v[i][PR.date - 1] instanceof Date ? ymd(v[i][PR.date - 1]) : String(v[i][PR.date - 1]), method: v[i][PR.clients - 1], amount: num(v[i][PR.payment - 1]), memo: v[i][PR.blank - 1], owedAfter: num(v[i][PR.owed - 1]), id: v[i][PR.recordId - 1] });
+  });
+  return out.sort(function (a, b) { return a.date < b.date ? 1 : -1; }).slice(0, 60);
+}
+/** One-time: add Guides.Email (with provided addresses) and bold/green every existing payment row on every Hours tab. */
+function setupPayments(p) {
+  var gs = sh(TAB.guides); var h = gs.getRange(1, 1, 1, gs.getLastColumn()).getValues()[0]; var ec = h.indexOf('Email') + 1;
+  if (!ec) { ec = h.length + 1; gs.getRange(1, ec).setValue('Email').setFontWeight('bold'); }
+  var emails = p.emails || {}; var gv = gs.getDataRange().getValues(); var setN = 0;
+  for (var i = 1; i < gv.length; i++) { var nm = String(gv[i][0]); if (emails[nm] && !gv[i][ec - 1]) { gs.getRange(i + 1, ec).setValue(emails[nm]); setN++; } }
+  var formatted = {};
+  guides().forEach(function (g) { var s = ss().getSheetByName(g.name + ' Hours'); if (!s) return; var v = s.getDataRange().getValues(); var n = 0;
+    for (var r = 1; r < v.length; r++) if (isPaymentRow(v[r])) { formatPaymentRow(s, r + 1); n++; }
+    formatted[g.name] = n; });
+  return { emailsSet: setN, formatted: formatted };
 }
 function payrollDue() {
   return guides().filter(function (g) { return g.name !== 'Jim'; }).map(function (g) {

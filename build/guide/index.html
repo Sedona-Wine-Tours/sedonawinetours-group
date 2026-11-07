@@ -45,6 +45,7 @@ input[type=number]{-moz-appearance:textfield}
 .note{background:#fff8ef;border:1px solid #f1d9b5;border-radius:10px;padding:10px 12px;font-size:14px;margin:8px 0}
 .err{background:#fdeceb;border:1px solid #f3b9b4;color:var(--bad);border-radius:10px;padding:10px 12px;font-size:14px;margin:8px 0}
 .okbox{background:#e9f6ee;border:1px solid #b9e0c6;border-radius:10px;padding:12px;margin:8px 0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:420px){.row2{grid-template-columns:1fr}}
 .booking{border:1.5px solid var(--brand);border-radius:12px;padding:12px;margin:12px 0;background:#fffdfc}
 .booking h3{margin-top:0;color:var(--brand)}
 .sticky{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%)}
@@ -155,6 +156,7 @@ function homeView() {
   });
   $('#manual', card).onclick = function () { startRun(null); };
   v.appendChild(card);
+  if (S.session.isAdmin && S.boot) v.appendChild(paymentCard());
   if (S.mine && S.mine.length) {
     var mc = el('<div class="card"><h2>Your recent entries</h2><p class="muted">Tap one to correct it. The original is kept in the archive.</p><div id="mine"></div></div>');
     S.mine.slice(0, 12).forEach(function (m) {
@@ -166,6 +168,35 @@ function homeView() {
     v.appendChild(mc);
   }
   return v;
+}
+
+// ------------------------------------------------------------ record a payment (Jim only)
+function paymentCard() {
+  var B = S.boot; var gl = (B.guides || []).filter(function (g) { return g.name !== 'Jim'; });
+  var methods = B.paymentMethods || ['Zelle', 'Venmo', 'Cash', 'Check', 'PayPal', 'Direct deposit'];
+  var today = new Date(); var ymd = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+  var c = el('<div class="card" id="paycard"><h2>Record a payment to a guide</h2><p class="muted">Posts to the guide\'s Hours tab (bold, green), recalculates what you owe, and emails the guide their new balance. Payments are final.</p>' +
+    '<label>Guide</label><select id="pg">' + gl.map(function (g) { return '<option>' + esc(g.name) + '</option>'; }).join('') + '</select>' +
+    '<div class="row2"><div><label>Amount paid ($)</label><input id="pa" type="number" inputmode="decimal" step="0.01" min="0.01" placeholder="0.00"></div><div><label>Method</label><select id="pm">' + methods.map(function (m) { return '<option>' + esc(m) + '</option>'; }).join('') + '</select></div></div>' +
+    '<div class="row2"><div><label>Date of payment</label><input id="pd" type="date" value="' + ymd + '"></div><div><label>Memo (optional)</label><input id="pn" type="text" placeholder="e.g. covers through Nov 5"></div></div>' +
+    '<div class="row2"><div><label>Your PIN</label><input id="pp1" type="password" inputmode="numeric" autocomplete="off"></div><div><label>PIN again</label><input id="pp2" type="password" inputmode="numeric" autocomplete="off"></div></div>' +
+    '<div id="perr"></div><div style="margin-top:10px"><button class="btn" id="pgo">Record payment</button></div></div>');
+  $('#pgo', c).onclick = function () {
+    var errs = []; var amt = Number($('#pa', c).value); var p1 = $('#pp1', c).value, p2 = $('#pp2', c).value;
+    if (!(amt > 0)) errs.push('Enter the amount paid.');
+    if (!$('#pd', c).value) errs.push('Enter the payment date.');
+    if (!p1 || p1 !== p2) errs.push('Enter your PIN twice, the same both times.');
+    if (errs.length) { $('#perr', c).innerHTML = '<div class="err">' + errs.map(esc).join('<br>') + '</div>'; return; }
+    var btn = $('#pgo', c); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Recording';
+    api({ action: 'admin', op: 'recordPayment', guide: $('#pg', c).value, amount: amt, method: $('#pm', c).value, date: $('#pd', c).value, memo: $('#pn', c).value, pin: p1 }).then(function (r) {
+      var d = r || {};
+      var bal = d.balanceAfter < 0 ? 'Credit of ' + money(-d.balanceAfter) + ' (paid ahead)' : 'Now owed: ' + money(d.balanceAfter);
+      $('#perr', c).innerHTML = '<div class="okbox"><b>Recorded.</b> ' + esc(d.guide) + ' paid ' + money(d.amount) + ' by ' + esc(d.method) + ' on ' + esc(niceDate(d.date)) + '. ' + esc(bal) + '.' + (d.emailed ? ' Email sent to ' + esc(d.emailTo) + '.' : ' <span style="color:var(--bad)">Email not sent' + (d.emailError ? ': ' + esc(d.emailError) : (d.emailTo ? '' : ' (no email on the Guides tab)')) + '.</span>') + '</div>';
+      $('#pa', c).value = ''; $('#pn', c).value = ''; $('#pp1', c).value = ''; $('#pp2', c).value = '';
+      btn.disabled = false; btn.textContent = 'Record payment';
+    }).catch(function (e) { $('#perr', c).innerHTML = '<div class="err">' + esc(e.message) + '</div>'; btn.disabled = false; btn.textContent = 'Record payment'; });
+  };
+  return c;
 }
 
 function confirmEdit(m) {
