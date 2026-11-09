@@ -554,6 +554,7 @@ function admin(g, p) {
   if (op === 'installTriggers') return installTriggers();
   if (op === 'recordPayment') return recordPayment(g, p);
   if (op === 'payments') return listPayments(p.guide);
+  if (op === 'resendPaymentEmail') return resendPaymentEmail(g, p);
   if (op === 'setupPayments') return setupPayments(p);
   if (op === 'crmQueue') return crmQueue(p);
   if (op === 'crmMark') return crmMark(p);
@@ -636,6 +637,25 @@ function recordPayment(g, p) {
   try { emailed = sendPaymentEmail(guide, payload, covered); } catch (e) { emailError = String(e.message || e); }
   return { ok: true, paymentId: payId, guide: guide.name, amount: amount, method: method, date: ymd(when), balanceBefore: before, balanceAfter: after, emailed: emailed, emailError: emailError, emailTo: guide.email };
 }
+/** Re-send the email for a recorded payment (used when the first send failed, e.g. before mail permission was granted). */
+function resendPaymentEmail(g, p) {
+  if (g.name !== 'Jim') throw new Error('Only Jim can do that');
+  var payId = String(p.paymentId || '').trim(); if (!payId) throw new Error('Which payment?');
+  var hit = null;
+  guides().filter(function (x) { return x.name !== 'Jim'; }).forEach(function (x) {
+    if (hit) return; var s = ss().getSheetByName(x.name + ' Hours'); if (!s) return; var v = s.getDataRange().getValues();
+    for (var i = 1; i < v.length; i++) if (String(v[i][PR.recordId - 1]) === payId) { hit = { guide: x, v: v, i: i }; break; }
+  });
+  if (!hit) throw new Error('No payment with id ' + payId);
+  var r = hit.v[hit.i]; var covered = [];
+  for (var j = hit.i - 1; j >= 1; j--) { if (isPaymentRow(hit.v[j])) break; if (hit.v[j].join('') === '') continue; covered.unshift({ date: hit.v[j][PR.date - 1] instanceof Date ? ymd(hit.v[j][PR.date - 1]) : String(hit.v[j][PR.date - 1]).slice(0, 10), tour: hit.v[j][PR.tour - 1], clients: hit.v[j][PR.clients - 1], hours: hit.v[j][PR.hours - 1], pay: hit.v[j][PR.pay - 1], pickup: hit.v[j][PR.pickup - 1], charged: hit.v[j][PR.chargedAmt - 1], cash: hit.v[j][PR.cash - 1], totalDue: hit.v[j][PR.totalDue - 1] }); }
+  var prevOwed = 0; for (var k = hit.i - 1; k >= 1; k--) { if (hit.v[k].join('') === '') continue; prevOwed = num(hit.v[k][PR.owed - 1]); break; }
+  var payload = { guide: hit.guide.name, amount: num(r[PR.payment - 1]), method: String(r[PR.clients - 1]).replace(/ Payment$/, ''), date: r[PR.date - 1] instanceof Date ? ymd(r[PR.date - 1]) : String(r[PR.date - 1]).slice(0, 10), memo: String(r[PR.blank - 1] || ''), balanceBefore: prevOwed, balanceAfter: num(r[PR.owed - 1]) };
+  var emailed = sendPaymentEmail(hit.guide, payload, covered);
+  return { ok: true, paymentId: payId, emailed: emailed, emailTo: hit.guide.email, balanceAfter: payload.balanceAfter, covered: covered.length };
+}
+/** Run once from the editor to grant the send-mail permission the web app needs. */
+function authorizeMail() { Logger.log('Mail quota left today: ' + MailApp.getRemainingDailyQuota()); }
 function money(n) { n = num(n); return (n < 0 ? '-' : '') + '$' + Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 function sendPaymentEmail(guide, pay, covered) {
   if (!guide.email) return false;
@@ -664,7 +684,8 @@ function listPayments(guideName) {
 function setupPayments(p) {
   var gs = sh(TAB.guides); var h = gs.getRange(1, 1, 1, gs.getLastColumn()).getValues()[0]; var ec = h.indexOf('Email') + 1;
   if (!ec) { ec = h.length + 1; gs.getRange(1, ec).setValue('Email').setFontWeight('bold'); }
-  var emails = p.emails || {}; var gv = gs.getDataRange().getValues(); var setN = 0;
+  var emails = p.emails || {}; if (typeof emails === 'string') { try { emails = JSON.parse(emails); } catch (e) { emails = {}; } }
+  SpreadsheetApp.flush(); var gv = gs.getDataRange().getValues(); var setN = 0;
   for (var i = 1; i < gv.length; i++) { var nm = String(gv[i][0]); if (emails[nm] && !gv[i][ec - 1]) { gs.getRange(i + 1, ec).setValue(emails[nm]); setN++; } }
   var formatted = {};
   guides().forEach(function (g) { var s = ss().getSheetByName(g.name + ' Hours'); if (!s) return; var v = s.getDataRange().getValues(); var n = 0;
