@@ -1,6 +1,6 @@
 ---
-title: "Old Town Cottonwood Wine Tasting: A Walkable Guide to Main Street"
-description: "Old Town Cottonwood wine tasting, block by block: Main Street tasting rooms, hours, flight prices, parking, food and lodging, 30 minutes from Sedona."
+title: "Old Town Cottonwood Wine Tasting: A Walkable Winery Tour of Main Street"
+description: "Plan a Cottonwood AZ wine tour on foot: Old Town's Main Street tasting rooms block by block, with hours, flight prices, parking and food, 30 minutes from Sedona."
 date: 2026-10-06
 author: Jim Reich
 category: Verde Valley wine
