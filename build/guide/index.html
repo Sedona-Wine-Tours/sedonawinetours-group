@@ -69,7 +69,7 @@ small.help{display:block;color:var(--muted);font-size:12px;margin-top:3px}
 <script>
 var API = 'https://script.google.com/macros/s/AKfycbxk6VP_HYvcTbLTicIBSutAHZoLcOWlAHf4o9LlOU0KinTWN-E-15MFqiPbHC8binpc/exec';
 var FALLBACK_GUIDES = ['Jim', 'Juan', 'Ed', 'Uma'];
-var S = { session: null, boot: null, bookings: [], view: 'login', run: null, editing: null, mine: [] };
+var S = { session: null, boot: null, bookings: [], view: 'login', run: null, editing: null, mine: [], drafts: [], draftId: null };
 
 // ------------------------------------------------------------ api
 function api(params) {
@@ -132,8 +132,8 @@ function loginView() {
 
 function loadHome() {
   S.view = 'home'; S.loading = true; render();
-  return Promise.all([api({ action: 'bootstrap' }), api({ action: 'bookings', days: 2 }), api({ action: 'mine' })]).then(function (r) {
-    S.boot = r[0]; S.bookings = (r[1].bookings || []).map(function (b) { b.start = cleanTime(b.start); b.end = cleanTime(b.end); return b; }); S.window = r[1]; S.mine = r[2]; S.loading = false; render();
+  return Promise.all([api({ action: 'bootstrap' }), api({ action: 'bookings', days: 3 }), api({ action: 'mine' }), api({ action: 'myDrafts' }).catch(function () { return []; })]).then(function (r) {
+    S.boot = r[0]; S.bookings = (r[1].bookings || []).map(function (b) { b.start = cleanTime(b.start); b.end = cleanTime(b.end); return b; }); S.window = r[1]; S.mine = r[2]; S.drafts = r[3] || []; S.loading = false; render();
   }).catch(function (e) { S.loading = false; if (/signed in/i.test(e.message)) { S.session = null; S.view = 'login'; } S.error = e.message; render(); });
 }
 
@@ -144,18 +144,29 @@ function homeView() {
   var me = S.session.guide;
   var list = S.bookings.slice();
   // group SIP bookings by date+start so a run shows once
-  var card = el('<div class="card"><h2>Pick the tour you just finished</h2><p class="muted">Showing ' + niceDate(S.window.from) + ' – ' + niceDate(S.window.to) + '. Tours assigned to you are listed first.</p><div id="list"></div><div style="margin-top:12px"><button class="btn ghost" id="manual">Tour not listed? Enter it manually</button></div></div>');
+  var card = el('<div class="card"><h2>Pick the tour you just finished</h2><p class="muted">Showing ' + niceDate(S.window.from) + ' – ' + niceDate(S.window.to) + '. Every tour comes from FareHarbor; tours assigned to you are listed first.</p><div id="list"></div><div style="margin-top:12px"><button class="btn ghost" id="fetch">My booking isn\'t listed — fetch it from FareHarbor</button><div id="fetchbox"></div></div></div>');
   var listEl = $('#list', card);
   var mineFirst = list.sort(function (a, b) { var am = (a.crew || '').indexOf(me) >= 0 ? 0 : 1, bm = (b.crew || '').indexOf(me) >= 0 ? 0 : 1; if (am !== bm) return am - bm; return (b.date + b.start) < (a.date + a.start) ? -1 : 1; });
-  if (!mineFirst.length) listEl.appendChild(el('<p class="muted">No FareHarbor bookings found for these days yet. Use manual entry below.</p>'));
+  if (!mineFirst.length) listEl.appendChild(el('<p class="muted">No FareHarbor bookings found for these days yet. Tap the button below to fetch yours.</p>'));
   mineFirst.forEach(function (b) {
     var badge = b.recorded ? '<span class="badge ok">Recorded' + (b.recorded.by ? ' by ' + esc(b.recorded.by) : '') + '</span>' : ((b.crew || '').indexOf(me) >= 0 ? '<span class="badge mine">Assigned to you</span>' : '');
     var row = el('<div class="tour"><div><div class="t">' + esc(b.tour) + '</div><div class="s">' + niceDate(b.date) + ' · ' + esc(b.start) + ' · ' + esc(b.customer) + ' · ' + (b.adults + b.kids) + ' guests · ' + esc(b.division) + '</div></div>' + badge + '</div>');
     row.onclick = function () { startRun(b); };
     listEl.appendChild(row);
   });
-  $('#manual', card).onclick = function () { startRun(null); };
+  $('#fetch', card).onclick = function () { fetchFlow($('#fetchbox', card)); };
   v.appendChild(card);
+  if (S.drafts && S.drafts.length) {
+    var dc = el('<div class="card"><h2>Drafts waiting for a booking</h2><p class="muted">You saved these while the booking was still on its way from FareHarbor. Tap one to finish it.</p><div id="drafts"></div></div>');
+    S.drafts.forEach(function (d) {
+      var pend = (d.payload.bookings || [])[0] || {}; var found = S.bookings.filter(function (b) { return b.bookingId === String(pend.bookingId || ''); })[0];
+      var row = el('<div class="tour"><div><div class="t">' + esc(pend.tour || 'Booking #' + (pend.bookingId || '?')) + '</div><div class="s">' + esc(niceDate(pend.date)) + ' · saved ' + esc(String(d.savedAt).replace('T', ' ').slice(0, 16)) + '</div></div>' + (found ? '<span class="badge ok">Booking arrived — finish it</span>' : '<span class="badge">Still waiting</span>') + '</div>');
+      row.onclick = function () { openDraft(d, found); };
+      $('#drafts', dc).appendChild(row);
+    });
+    v.appendChild(dc);
+  }
+  v.appendChild(eventCard());
   if (S.session.isAdmin && S.boot) v.appendChild(paymentCard());
   if (S.mine && S.mine.length) {
     var mc = el('<div class="card"><h2>Your recent entries</h2><p class="muted">Tap one to correct it. The original is kept in the archive.</p><div id="mine"></div></div>');
@@ -168,6 +179,68 @@ function homeView() {
     v.appendChild(mc);
   }
   return v;
+}
+
+// ------------------------------------------------------------ fetch a missing booking / drafts / trainings
+function fetchFlow(box) {
+  box.innerHTML = '';
+  var f = el('<div class="note"><label>FareHarbor booking # (from the FareHarbor app or the confirmation)</label><input type="text" inputmode="numeric" id="fid" placeholder="e.g. 384084156"><label>Anything to tell Jim (optional)</label><input type="text" id="fnote" placeholder="e.g. booked by phone this morning"><div style="margin-top:8px"><button class="btn small" id="fgo">Fetch it</button></div><div id="fmsg"></div></div>');
+  $('#fgo', f).onclick = function () {
+    var bid = $('#fid', f).value.replace(/\D/g, ''); var msg = $('#fmsg', f); var btn = $('#fgo', f);
+    if (!bid) { msg.innerHTML = '<div class="err">Type the booking number first.</div>'; return; }
+    if (S.bookings.some(function (b) { return b.bookingId === bid; })) { msg.innerHTML = '<div class="okbox">Booking #' + esc(bid) + ' is already in the list above.</div>'; return; }
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Asking FareHarbor';
+    api({ action: 'requestFetch', bookingId: bid, note: $('#fnote', f).value }).then(function (d) {
+      if (d.status === 'found') return loadHome();
+      var tries = 0; msg.innerHTML = '<div class="okbox">Asked for booking #' + esc(bid) + '. This usually takes 1–3 minutes; I\'ll refresh the list when it lands. You can start filling in the tour meanwhile and save it as a draft.</div><div style="margin-top:8px"><button class="btn small secondary" id="fdraft">Start a draft for #' + esc(bid) + '</button></div>';
+      $('#fdraft', msg).onclick = function () { startPending(bid); };
+      (function poll() {
+        tries++;
+        api({ action: 'fetchStatus', requestId: d.requestId }).then(function (st) {
+          if (st.status === 'found') { msg.innerHTML = '<div class="okbox">Booking #' + esc(bid) + ' arrived.</div>'; return loadHome(); }
+          if (tries < 15) setTimeout(poll, 20000);
+          else msg.insertAdjacentHTML('beforeend', '<div class="note">FareHarbor hasn\'t sent it yet. Jim has been alerted. Save a draft now; you\'ll get an email when the booking is ready to finish.</div>');
+        }).catch(function () { if (tries < 15) setTimeout(poll, 20000); });
+      })();
+    }).catch(function (e) { msg.innerHTML = '<div class="err">' + esc(e.message) + '</div>'; btn.disabled = false; btn.textContent = 'Fetch it'; });
+  };
+  box.appendChild(f); $('#fid', f).focus();
+}
+function startPending(bid) {
+  var entry = newBookingEntry({ bookingId: bid }); entry.pending = true; entry.manual = true;
+  var run = { division: 'Wine Tours of Sedona', guide: S.session.guide, secondaryGuide: '', trainee: '', pickupZone: 'Sedona / Uptown / Oak Creek Canyon / Village of Oak Creek', scheduledStart: '', scheduledEnd: '', startTime: '', finishTime: '', bookedHours: '', overtimeBillable: false, fotaflo: '', bookings: [entry], pendingBookingId: bid };
+  S.run = run; S.draftId = null; S.editing = null; S.view = 'form'; window.scrollTo(0, 0); render();
+}
+function openDraft(d, found) {
+  var run = JSON.parse(JSON.stringify(d.payload)); run.bookings = (run.bookings || []).map(function (x) { x.tips = x.tips || []; x.expenses = x.expenses || []; return x; });
+  if (found) {
+    var old = run.bookings[0] || {}; var fresh = newBookingEntry(found);
+    ['tourDetails', 'customerDetails', 'expenses', 'tips', 'pickupLocation'].forEach(function (k) { if (old[k] && (!Array.isArray(old[k]) || old[k].length)) fresh[k] = old[k]; });
+    run.bookings[0] = fresh; run.division = found.division || run.division; delete run.pendingBookingId;
+    if (!run.scheduledEnd) run.scheduledEnd = fresh.scheduledEnd || (fresh.scheduledStart ? addHours(fresh.scheduledStart, fresh.duration || 0) : '');
+    if (!run.startTime) run.startTime = fresh.scheduledStart; if (!run.finishTime) run.finishTime = run.scheduledEnd; if (!run.bookedHours) run.bookedHours = fresh.duration || '';
+  }
+  S.run = run; S.draftId = d.draftId; S.editing = null; S.view = 'form'; window.scrollTo(0, 0); render();
+}
+function saveDraft(btn, box) {
+  var R = S.run; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Saving';
+  api({ action: 'saveDraft', payload: R, draftId: S.draftId }).then(function (d) { S.draftId = d.draftId; box.innerHTML = '<div class="okbox">Draft saved. Come back to it from the home screen once the booking has arrived (you\'ll get an email).</div>'; btn.disabled = false; btn.textContent = 'Save draft'; })
+    .catch(function (e) { box.innerHTML = '<div class="err">' + esc(e.message) + '</div>'; btn.disabled = false; btn.textContent = 'Save draft'; });
+}
+function eventCard() {
+  var B = S.boot || {}; var me = S.session.guide; var gl = (B.guides || []).filter(function (g) { return g.name !== 'Jim'; });
+  var c = el('<div class="card"><h2>Training or meeting (no booking)</h2><p class="muted">For paid hours that aren\'t a tour: a one-on-one training, a meeting, a ride-along you led. Jim approves it before it reaches payroll. (A trainee riding along on a real tour is recorded on that tour, not here.)</p>' +
+    (S.session.isAdmin ? '<label>Guide</label><select id="eg">' + gl.map(function (g) { return '<option>' + esc(g.name) + '</option>'; }).join('') + '</select>' : '') +
+    '<div class="row2"><div><label>Date</label><input type="date" id="ed" value="' + todayStr() + '"></div><div><label>Event</label><input type="text" id="ee" placeholder="e.g. Ride-along training with Jim"></div></div>' +
+    '<div class="row2"><div><label>Start</label><input type="time" id="es"></div><div><label>End</label><input type="time" id="ef"></div></div><div id="emsg"></div><div style="margin-top:10px"><button class="btn secondary" id="ego">Send for approval</button></div></div>');
+  $('#ego', c).onclick = function () {
+    var btn = $('#ego', c), msg = $('#emsg', c); var ev = { guide: S.session.isAdmin ? $('#eg', c).value : me, date: $('#ed', c).value, event: $('#ee', c).value.trim(), start: $('#es', c).value, end: $('#ef', c).value };
+    if (!ev.date || !ev.event || !ev.start || !ev.end) { msg.innerHTML = '<div class="err">Fill in the date, event, start and end.</div>'; return; }
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Sending';
+    api({ action: 'submitEvent', event: ev }).then(function (d) { msg.innerHTML = '<div class="okbox">Sent to Jim: ' + esc(d.event) + ' on ' + esc(niceDate(d.date)) + ', ' + d.hours + ' h (' + money(d.pay) + '). You\'ll get an email when he approves it.</div>'; $('#ee', c).value = ''; $('#es', c).value = ''; $('#ef', c).value = ''; btn.disabled = false; btn.textContent = 'Send for approval'; })
+      .catch(function (e) { msg.innerHTML = '<div class="err">' + esc(e.message) + '</div>'; btn.disabled = false; btn.textContent = 'Send for approval'; });
+  };
+  return c;
 }
 
 // ------------------------------------------------------------ record a payment (Jim only)
@@ -282,9 +355,8 @@ function formView() {
       var pick = $('#pick', add); pick.innerHTML = '';
       var used = R.bookings.map(function (x) { return x.bookingId; });
       var opts = S.bookings.filter(function (o) { return used.indexOf(o.bookingId) < 0 && !o.recorded; });
-      if (!opts.length) { pick.appendChild(el('<p class="muted">No other unrecorded bookings. Add a manual one:</p>')); var mb = el('<button class="btn small secondary">Add manual booking</button>'); mb.onclick = function () { R.bookings.push(newBookingEntry(null)); copyTourDetails(); render(); }; pick.appendChild(mb); return; }
+      if (!opts.length) { pick.appendChild(el('<p class="muted">No other unrecorded FareHarbor bookings for these days. If one is missing, go back and fetch it first.</p>')); return; }
       opts.forEach(function (o) { var p = el('<div class="tour"><div><div class="t">' + esc(o.customer) + '</div><div class="s">' + niceDate(o.date) + ' · ' + esc(o.start) + ' · ' + esc(o.tour) + ' · ' + (o.adults + o.kids) + ' guests</div></div><span class="badge">Add</span></div>'); p.onclick = function () { R.bookings.push(newBookingEntry(o)); copyTourDetails(); render(); }; pick.appendChild(p); });
-      var mb2 = el('<button class="btn small secondary" style="margin-top:8px">Or add a manual booking</button>'); mb2.onclick = function () { R.bookings.push(newBookingEntry(null)); copyTourDetails(); render(); }; pick.appendChild(mb2);
     };
     v.appendChild(add);
   }
@@ -294,8 +366,10 @@ function formView() {
   var fb = $$('button', $('#foto', c3)); if (R.fotaflo === 'Yes') fb[0].classList.add('on'); if (R.fotaflo === 'No') fb[1].classList.add('on');
   fb[0].onclick = function () { R.fotaflo = 'Yes'; fb[0].classList.add('on'); fb[1].classList.remove('on'); }; fb[1].onclick = function () { R.fotaflo = 'No'; fb[1].classList.add('on'); fb[0].classList.remove('on'); };
   v.appendChild(c3);
-  var bar = el('<div class="sticky"><button class="btn" id="submit">Submit tour</button></div>');
-  $('#submit', bar).onclick = function () { submitRun($('#submit', bar), $('#ferr', c3)); };
+  var pending = R.bookings.some(function (b) { return b.pending; });
+  var bar = el('<div class="sticky">' + (pending ? '<button class="btn secondary" id="draft">Save draft</button>' : '<button class="btn" id="submit">Submit tour</button>' + (S.draftId ? '' : '')) + '</div>');
+  if (pending) { $('#draft', bar).onclick = function () { saveDraft($('#draft', bar), $('#ferr', c3)); }; v.insertBefore(el('<div class="note">Waiting for FareHarbor booking #' + esc(R.pendingBookingId || '') + '. Fill in what you can and save a draft; Submit unlocks once the booking arrives.</div>'), v.firstChild); }
+  else $('#submit', bar).onclick = function () { submitRun($('#submit', bar), $('#ferr', c3)); };
   v.appendChild(bar);
   var back = el('<p style="text-align:center"><button class="btn small secondary" id="back">← Back without saving</button></p>');
   $('#back', back).onclick = function () { S.editing = null; S.run = null; S.view = 'home'; render(); };
@@ -308,7 +382,8 @@ function copyTourDetails() { var R = S.run; var first = R.bookings[0]; R.booking
 function bookingCard(bk, i) {
   var R = S.run, B = S.boot; var multi = R.bookings.length > 1;
   var c = el('<div class="booking"><h3>' + (multi ? 'Booking ' + (i + 1) : 'Booking') + (bk.bookingId ? ' · #' + esc(bk.bookingId) : ' · manual entry') + (multi ? ' <button class="x" title="Remove" style="float:right">×</button>' : '') + '</h3>' +
-    (bk.manual ? '<div class="row"><div><label>FareHarbor booking # (if known)</label><input type="text" inputmode="numeric" id="bid"></div><div><label>Tour date</label><input type="date" id="bdate"></div></div><label>Tour name</label><input type="text" id="btour" list="tours"><datalist id="tours"></datalist><div class="row"><div><label>Amount paid (FareHarbor total)</label><input type="number" step="0.01" inputmode="decimal" id="bpaid"></div><div><label>Paid by</label><select id="bpay"><option value="card">Card</option><option value="in-store">Cash / other</option></select></div></div>' : '<div class="muted">' + esc(bk.tour) + ' · ' + niceDate(bk.date) + '</div>') +
+    (bk.pending ? '<div class="muted">Booking #' + esc(bk.bookingId) + ' — details arrive from FareHarbor</div>' : bk.manual ? '<div class="muted">' + esc(bk.tour || 'Entered before FareHarbor sync') + ' · ' + niceDate(bk.date) + ' · amounts come from FareHarbor when you submit</div>' : '<div class="muted">' + esc(bk.tour) + ' · ' + niceDate(bk.date) + (bk.amountPaid ? ' · ' + money(bk.amountPaid) + ' paid' : '') + '</div>') +
+    '<small class="help">Adults, kids, pets and pickup come from FareHarbor. Correct them if the real tour was different; Jim gets a card to confirm any change.</small>' +
     '<label>Client name(s)</label><input type="text" id="bcust"><div class="row"><div><label>Adults</label><input type="number" min="0" inputmode="numeric" id="ba"></div><div><label>Kids</label><input type="number" min="0" inputmode="numeric" id="bk"></div><div><label>Pets</label><input type="number" min="0" inputmode="numeric" id="bp"></div></div>' +
     '<label>Pickup location</label><input type="text" id="bpick" placeholder="Hotel / address">' +
     '<label>Tour details (route and stops, in order)</label><textarea id="btd" placeholder="e.g. Sedona Pines / West Sedona / Page Springs North / Oak Creek Vineyards / …"></textarea>' +
@@ -316,12 +391,6 @@ function bookingCard(bk, i) {
     '<h3>Expenses</h3><div id="exp"></div><button class="btn small secondary" id="addexp">+ Add expense</button>' +
     '<h3>Tips</h3><div id="builtin"></div><div id="tips"></div><button class="btn small secondary" id="addtip">+ Add tip</button></div>');
   if (multi) $('.x', c).onclick = function () { R.bookings.splice(i, 1); render(); };
-  if (bk.manual) {
-    $('#bid', c).value = bk.bookingId; $('#bdate', c).value = bk.date; $('#btour', c).value = bk.tour; $('#bpaid', c).value = bk.amountPaid; $('#bpay', c).value = bk.paymentType || 'card';
-    $('#bid', c).onchange = function () { bk.bookingId = this.value.trim(); }; $('#bdate', c).onchange = function () { bk.date = this.value; }; $('#btour', c).onchange = function () { bk.tour = this.value; }; $('#bpaid', c).onchange = function () { bk.amountPaid = this.value; }; $('#bpay', c).onchange = function () { bk.paymentType = this.value; };
-    var dl = $('#tours', c); var seen = {}; S.bookings.concat([]).forEach(function (o) { if (o.tour && !seen[o.tour]) { seen[o.tour] = 1; dl.appendChild(el('<option value="' + esc(o.tour) + '">')); } });
-    ['A Multi-Vineyard & Winery Tasting Experience', 'The Terroir of the Verde Valley Wine Trail', 'Alcantara Estate Vineyards Tasting Experience', '3-Hour Tasting Adventure', '4-Hour SIP & Savor Tour', '5-Hour Wine, Beer & Beyond Experience', 'Sedona & Verde Valley Tour: Wine, Beer, Raw Chocolate, & Lunch', 'Sedona Magical Vortex Tour', 'Scenic Sedona, Ancient Indian Ruins, & Historic Jerome', 'Vines & Vistas: Kayak and Wine Experience', 'Date Night with Dinner', 'Chapels, Where The Rivers Meet, & Wine', 'The Flavors of Historic Jerome', 'A Taste of "Old Town" Cottonwood', 'Shuttle'].forEach(function (t) { if (!seen[t]) dl.appendChild(el('<option value="' + esc(t) + '">')); });
-  }
   $('#bcust', c).value = bk.customer; $('#ba', c).value = bk.adults; $('#bk', c).value = bk.kids; $('#bp', c).value = bk.pets; $('#bpick', c).value = bk.pickupLocation; $('#btd', c).value = bk.tourDetails; $('#bcd', c).value = bk.customerDetails;
   $('#bcust', c).onchange = function () { bk.customer = this.value; }; $('#ba', c).onchange = function () { bk.adults = this.value; }; $('#bk', c).onchange = function () { bk.kids = this.value; }; $('#bp', c).onchange = function () { bk.pets = this.value; }; $('#bpick', c).onchange = function () { bk.pickupLocation = this.value; };
   $('#btd', c).oninput = function () { bk.tourDetails = this.value; if (i === 0 && R.division === 'SIP Sedona') R.bookings.forEach(function (o, j) { if (j > 0 && (!o.tourDetails || o._copied)) { o.tourDetails = bk.tourDetails; o._copied = true; var ta = $$('.booking')[j] && $('#btd', $$('.booking')[j]); if (ta) ta.value = o.tourDetails; } }); };
@@ -372,7 +441,7 @@ function validate(R) {
     if (b.adults === '' || b.adults == null) errs.push(n + 'number of adults is required.');
     if (!String(b.tourDetails || '').trim()) errs.push(n + 'tour details are required.');
     if (!String(b.customerDetails || '').trim()) errs.push(n + 'customer details are required.');
-    if (b.manual && !b.tour) errs.push(n + 'tour name is required.');
+    if (b.pending) errs.push(n + 'FareHarbor booking #' + b.bookingId + ' has not arrived yet. Save a draft instead.');
     (b.expenses || []).forEach(function (x) { if ((x.vendor && !x.amount) || (!x.vendor && x.amount)) errs.push(n + 'each expense needs a vendor and an amount.'); });
     (b.tips || []).forEach(function (t) { if (!t.amount) errs.push(n + 'each tip line needs an amount (or remove it).'); });
   });
@@ -386,7 +455,7 @@ function submitRun(btn, errBox) {
   var payload = JSON.parse(JSON.stringify(R));
   payload.bookings.forEach(function (b) { b.expenses = b.expenses.filter(function (x) { return x.vendor && x.amount; }); b.tips = b.tips.filter(function (t) { return t.amount; }); delete b._copied; });
   var req = S.editing ? { action: 'archiveAndResubmit', submissionId: S.editing.submissionId, payload: payload } : { action: 'submit', payload: payload };
-  api(req).then(function (d) { S.result = d; S.editing = null; S.run = null; S.view = 'done'; window.scrollTo(0, 0); render(); })
+  api(req).then(function (d) { S.result = d; S.editing = null; S.run = null; if (S.draftId) { api({ action: 'deleteDraft', draftId: S.draftId }).catch(function () { }); S.draftId = null; } S.view = 'done'; window.scrollTo(0, 0); render(); })
     .catch(function (e) { errBox.innerHTML = '<div class="err">' + esc(e.message) + '</div>'; btn.disabled = false; btn.textContent = 'Submit tour'; });
 }
 

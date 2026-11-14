@@ -138,6 +138,12 @@ function handle(p) {
     if (a === 'mine') { var g4 = requireAuth(p); return json({ ok: true, data: mySubmissions(g4) }); }
     if (a === 'archiveAndResubmit') { var g5 = requireAuth(p); return json({ ok: true, data: archiveAndResubmit(g5, p.submissionId, p.payload) }); }
     if (a === 'vendorRequest') { var g6 = requireAuth(p); return json({ ok: true, data: vendorRequest(g6, p.name) }); }
+    if (a === 'requestFetch') { var g7 = requireAuth(p); return json({ ok: true, data: requestFetch(g7, p) }); }
+    if (a === 'fetchStatus') { var g8 = requireAuth(p); return json({ ok: true, data: fetchStatus(g8, p.requestId) }); }
+    if (a === 'saveDraft') { var g9 = requireAuth(p); return json({ ok: true, data: saveDraft(g9, p.payload, p.draftId) }); }
+    if (a === 'myDrafts') { var g10 = requireAuth(p); return json({ ok: true, data: myDrafts(g10) }); }
+    if (a === 'deleteDraft') { var g11 = requireAuth(p); return json({ ok: true, data: deleteDraft(g11, p.draftId) }); }
+    if (a === 'submitEvent') { var g12 = requireAuth(p); return json({ ok: true, data: submitEvent(g12, p.event || p) }); }
     // admin (Jim)
     if (a === 'admin') { var adm = requireAdmin(p); return json({ ok: true, data: admin(adm, p) }); }
     // Zap / sync endpoints (protected by shared key)
@@ -179,14 +185,39 @@ function fhUpsert(list) {
     if (!b || !b.bookingId) return;
     var row = [b.bookingId, b.status || 'booked', b.date || '', b.start || '', b.duration || '', b.division || divisionFor(b), b.tour || '', b.customer || '', b.email || '', b.phone || '',
       b.adults || 0, b.kids || 0, b.pets || 0, b.pickup || '', num(b.amountPaid), num(b.subtotal), num(b.builtIn), num(b.bookingFee), num(b.taxes), b.ref || '', b.bookedAt || '', iso(now()),
-      JSON.stringify({ end: b.end || '', paymentType: b.paymentType || '', crew: b.crew || '', notes: b.notes || '', customerTypes: b.customerTypes || '' })];
+      JSON.stringify({ end: b.end || '', paymentType: b.paymentType || '', crew: b.crew || '', notes: b.notes || '', customerTypes: b.customerTypes || '', builtInUnknown: !!b.builtInUnknown })];
     var r = idx[String(b.bookingId)];
     if (!r) { r = s.getLastRow() + 1; idx[String(b.bookingId)] = r; }
     s.getRange(r, 4).setNumberFormat('@');   // Start Time stays text, never a Dec 30, 1899 time cell
     s.getRange(r, 1, 1, row.length).setValues([row]);
     n++;
   });
+  try { detectFeedChanges(list); } catch (e) { /* never block the feed */ }
+  try { settleFetchRequests(); } catch (e) { }
   return { upserted: n };
+}
+/** A booking that was already recorded by a guide just arrived (or changed) in FareHarbor with different money: give Jim a card. */
+function detectFeedChanges(list) {
+  var ids = {}; (list || []).forEach(function (b) { if (b && b.bookingId) ids[String(b.bookingId)] = b; });
+  if (!Object.keys(ids).length) return;
+  var cd = sh(TAB.cd).getDataRange().getValues(); var open = openAlertKeys('feed-change');
+  for (var i = 1; i < cd.length; i++) {
+    var bid = String(cd[i][CD.bookingId - 1]); var b = ids[bid]; if (!b) continue;
+    if (String(cd[i][CD.source - 1]).indexOf('Guide Form') !== 0) continue;
+    var oldPaid = num(cd[i][CD.fhPaid - 1]), newPaid = round2(num(b.amountPaid));
+    var oldBI = num(cd[i][CD.builtIn - 1]), newBI = round2(num(b.builtIn));
+    var paidDiff = Math.abs(oldPaid - newPaid) > 0.01, biDiff = !b.builtInUnknown && newBI > 0 && Math.abs(oldBI - newBI) > 0.01;
+    if (!paidDiff && !biDiff) continue;
+    if (open[bid]) continue;
+    var note = JSON.stringify({ msg: 'FareHarbor now shows different numbers for a tour already recorded', oldPaid: oldPaid, newPaid: newPaid, oldBuiltIn: oldBI, newBuiltIn: b.builtInUnknown ? null : newBI, builtInUnknown: !!b.builtInUnknown });
+    addAlert('feed-change', bid, cd[i][CD.guide - 1], cd[i][CD.clients - 1], '', newPaid, cd[i][CD.id - 1], note);
+    open[bid] = true;
+  }
+}
+function openAlertKeys(type) {
+  var s = ss().getSheetByName(TAB.alerts); var out = {}; if (!s) return out; var v = s.getDataRange().getValues();
+  for (var i = 1; i < v.length; i++) if (String(v[i][2]) === type && String(v[i][8]) === 'open') out[String(v[i][3])] = true;
+  return out;
 }
 
 /**
@@ -208,15 +239,20 @@ function normalizeRawRow(r) {
   else { var gi = -1; names.forEach(function (nme, i) { if (gi < 0 && /gratuit|tip/i.test(nme)) gi = i; }); if (gi >= 0) { var nz = totals.filter(function (t) { return num(t) !== 0; }); if (nz.length === 1) builtIn = centsToDollars(nz[0]); } }
   // custom field totals come in cents from the API; Zapier shows cents too. Treat values >= 100 with no decimal as cents.
   var paid = num(r['Amount Paid']), sub = num(r['Subtotal']);
-  if (paid > 0 && Math.round(paid) === paid && String(r['Amount Paid']).indexOf('.') < 0 && paid >= 1000) paid = paid / 100;
-  if (sub > 0 && Math.round(sub) === sub && String(r['Subtotal']).indexOf('.') < 0 && sub >= 1000) sub = sub / 100;
+  // The Zap maps FareHarbor's dollar amounts (a $2,724 dashboard booking arrives as "2724"); only the API poll sends cents.
+  var isZap = /zap/i.test(String(r['Source'] || ''));
+  if (!isZap && paid > 0 && Math.round(paid) === paid && String(r['Amount Paid']).indexOf('.') < 0 && paid >= 1000) paid = paid / 100;
+  if (!isZap && sub > 0 && Math.round(sub) === sub && String(r['Subtotal']).indexOf('.') < 0 && sub >= 1000) sub = sub / 100;
+  // FareHarbor lists an auto-gratuity field but sent no total for it (dashboard bookings do this): the amount is unknown, not zero
+  var gratField = names.some(function (nme) { return /gratuit|tip/i.test(nme); });
+  var builtInUnknown = gratField && !builtIn && totals.join('').replace(/,/g, '').trim() === '';
   var sa = String(r['Start At'] || ''), ea = String(r['End At'] || '');
   var date = sa.slice(0, 10), start = sa.length >= 16 ? sa.slice(11, 16) : '', end = ea.length >= 16 ? ea.slice(11, 16) : '';
   var dur = (sa && ea) ? Math.round(((new Date(ea).getTime() - new Date(sa).getTime()) / 3600000) * 4) / 4 : '';
   var b = { bookingId: String(r['Booking PK']).replace(/\D/g, ''), status: String(r['Status'] || 'booked'), date: date, start: start ? to12(start) : '', end: end, duration: dur, tour: String(r['Item'] || ''),
     customer: String(r['Contact Name'] || ''), email: String(r['Email'] || ''), phone: String(r['Phone'] || ''), adults: adults || num(r['Customer Count']), kids: kids, pets: pets,
     pickup: pickupFromRaw(r['Pickup']), amountPaid: round2(paid), subtotal: round2(sub), builtIn: round2(builtIn), bookingFee: 0, taxes: 0, ref: String(r['Booking Ref'] || ''), bookedAt: String(r['Created At'] || ''),
-    paymentType: splitList(r['Payment Types'])[0] || '', crew: String(r['Crew'] || ''), customerTypes: types.join(',') };
+    paymentType: splitList(r['Payment Types'])[0] || '', crew: String(r['Crew'] || ''), customerTypes: types.join(','), builtInUnknown: builtInUnknown };
   b.division = divisionFor(b);
   return b;
 }
@@ -246,6 +282,7 @@ function normalizeRaw() {
   for (var i = 1; i < v.length; i++) { if (v[i][pIdx - 1]) continue; var o = {}; h.forEach(function (k, j) { o[k] = v[i][j]; }); if (!o['Booking PK']) continue; list.push(normalizeRawRow(o)); rowsDone.push(i + 1); }
   if (list.length) fhUpsert(list);
   rowsDone.forEach(function (rn) { s.getRange(rn, pIdx).setValue(iso(now())); });
+  try { settleFetchRequests(); } catch (e) { }
   return { processed: list.length };
 }
 function installTriggers() {
@@ -256,7 +293,7 @@ function installTriggers() {
 
 /** Bookings for the picker: today and the previous N days (default 2), with "recorded" flags. */
 function bookingsForForm(g, days) {
-  days = Number(days) || 2;
+  days = Number(days) || 3;
   var today = ymd(now()); var from = ymd(new Date(now().getTime() - days * 86400000));
   var recorded = {}; var cd = sh(TAB.cd).getDataRange().getValues();
   for (var i = 1; i < cd.length; i++) { var bid = String(cd[i][CD.bookingId - 1]); if (bid) recorded[bid] = { by: cd[i][CD.submittedBy - 1], subId: cd[i][CD.subId - 1], recordId: cd[i][CD.id - 1] }; }
@@ -306,13 +343,19 @@ function compute(payload, R) {
     var amountPaid = round2(num(b.amountPaid));
     // Built-in gratuity: FareHarbor's figure always wins. Without one, apply the rule (18% on SIP/SWA; WTOS only for 6+ paying people),
     // backing it out of the amount paid (which includes the gratuity). A guide-typed figure never changes the payout; a mismatch only raises a check alert.
-    var builtIn = round2(num(b.builtInFromFH));
+    var builtIn = round2(num(b.builtInFromFH)); var systemBuiltIn = null;
     if (!builtIn && amountPaid > 0) {
       var pct = num((R.builtIn || {})[division]), minParty = num((R.builtInMinParty || {})[division]) || 1;
       if (pct > 0 && (adults + kids) >= minParty) builtIn = round2(amountPaid * pct / (1 + pct));
+      systemBuiltIn = builtIn;
     }
     var guideBuiltIn = round2((b.tips || []).filter(function (t) { return t.method === 'Built-in Gratuity'; }).reduce(function (s, t) { return s + num(t.amount); }, 0));
+    b._guideBuiltIn = guideBuiltIn; b._systemBuiltIn = systemBuiltIn === null ? builtIn : systemBuiltIn;
     if (guideBuiltIn && Math.abs(guideBuiltIn - builtIn) > 0.01) b._builtInOverride = true;
+    // FareHarbor shows a gratuity line but not its amount (dashboard bookings): the formula is only a guess until Jim confirms
+    if (b.builtInUnknownFromFH && !num(b.builtInFromFH)) b._builtInUnknown = true;
+    // Jim's decision on a mismatch card always wins
+    if (b.adminBuiltIn !== undefined && b.adminBuiltIn !== null && b.adminBuiltIn !== '') { builtIn = round2(num(b.adminBuiltIn)); b._builtInOverride = false; b._builtInUnknown = false; }
     var cardGrat = 0, direct = 0, directMethods = [];
     (b.tips || []).forEach(function (t) {
       var a = num(t.amount); if (!a) return;
@@ -373,10 +416,17 @@ function submit(g, P) {
   if (P.trainee && (P.trainee === P.guide || P.trainee === P.secondaryGuide)) throw new Error('The trainee must be a different person from the guides');
   // FareHarbor is the source of truth for money and scheduled times: re-read the booking server-side so nothing financial comes from the form
   var fhIdx = {}; tableRows(sh(TAB.fh)).forEach(function (r) { fhIdx[String(r['Booking ID'])] = r; });
+  var bookingDiffs = [];
   P.bookings.forEach(function (b, i) {
     var f = b.bookingId ? fhIdx[String(b.bookingId).replace(/\D/g, '')] : null; if (!f) return;
+    // guides may correct headcount / pickup, but every difference from FareHarbor becomes a card for Jim
+    var diffs = [];
+    [['adults', 'Adults'], ['kids', 'Kids'], ['pets', 'Pets']].forEach(function (k) { if (b[k[0]] !== '' && b[k[0]] != null && num(b[k[0]]) !== num(f[k[1]])) diffs.push({ field: k[0], fareharbor: num(f[k[1]]), guide: num(b[k[0]]) }); });
+    var fp = String(f['Pickup Location'] || '').trim(), gp = String(b.pickupLocation || '').trim();
+    if (gp && fp && gp.toLowerCase() !== fp.toLowerCase()) diffs.push({ field: 'pickup', fareharbor: fp, guide: gp });
+    if (diffs.length) bookingDiffs.push({ bookingId: String(b.bookingId), customer: b.customer || String(f['Customer Name'] || ''), diffs: diffs });
     var raw = {}; try { raw = JSON.parse(f['Raw'] || '{}'); } catch (e) { }
-    b.amountPaid = num(f['Amount Paid']); b.builtInFromFH = num(f['Built-in Gratuity']); b.paymentType = raw.paymentType || b.paymentType || 'card'; b.ref = String(f['Booking Source'] || b.ref || '');
+    b.amountPaid = num(f['Amount Paid']); b.builtInFromFH = num(f['Built-in Gratuity']); b.builtInUnknownFromFH = !!raw.builtInUnknown; b.manual = false; b.paymentType = raw.paymentType || b.paymentType || 'card'; b.ref = String(f['Booking Source'] || b.ref || '');
     if (!b.tour) b.tour = String(f['Item / Tour'] || ''); if (!b.customer) b.customer = String(f['Customer Name'] || '');
     if (i === 0) { if (num(f['Duration (hrs)']) > 0) P.bookedHours = num(f['Duration (hrs)']); if (raw.end) P.scheduledEnd = raw.end; }
   });
@@ -426,7 +476,11 @@ function submit(g, P) {
   var alerts = [];
   if (C.run.otHrs > 0) alerts.push(addAlert('overtime', bookingIds, P.guide, clients, C.run.otHrs, C.run.runOtAmt, recordIds.join(', '), 'Billable overtime: charge the customer'));
   C.bookings.forEach(function (x) { if (x.cardGrat > 0) alerts.push(addAlert('card-gratuity', x.b.bookingId, P.guide, x.b.customer, '', x.cardGrat, recordIds.join(', '), "Gratuity to charge to the customer's card on file")); });
-  C.bookings.forEach(function (x) { if (x.b._builtInOverride) alerts.push(addAlert('check', x.b.bookingId, P.guide, x.b.customer, '', x.builtIn, recordIds.join(', '), 'Guide entered a built-in gratuity different from FareHarbor; please verify')); });
+  C.bookings.forEach(function (x) {
+    if (x.b._builtInOverride) alerts.push(addAlert('builtin-mismatch', x.b.bookingId, P.guide, x.b.customer, '', x.builtIn, recordIds.join(', '), JSON.stringify({ msg: 'Guide entered a built-in gratuity different from the system', guide: x.b._guideBuiltIn, system: x.builtIn, fhKnown: num(x.b.builtInFromFH) > 0, amountPaid: x.amountPaid })));
+    else if (x.b._builtInUnknown) alerts.push(addAlert('builtin-mismatch', x.b.bookingId, P.guide, x.b.customer, '', x.builtIn, recordIds.join(', '), JSON.stringify({ msg: 'FareHarbor shows a built-in gratuity on this booking but not its amount; the system used the 18% formula', guide: x.b._guideBuiltIn || null, system: x.builtIn, fhKnown: false, amountPaid: x.amountPaid })));
+  });
+  bookingDiffs.forEach(function (d) { alerts.push(addAlert('booking-mismatch', d.bookingId, P.guide, d.customer, '', 0, recordIds.join(', '), JSON.stringify({ msg: 'Guide recorded this booking differently from FareHarbor', diffs: d.diffs }))); });
   // submission log
   sh(TAB.subs).appendRow([subId, stamp, g.name, P.division, bookingIds, recordIds.join(', '), JSON.stringify(P), JSON.stringify(C.run)]);
   return { submissionId: subId, recordIds: recordIds, hoursPaid: C.run.hoursPaid, otHours: C.run.otHrs, zoneHours: C.run.zoneHrs, alerts: alerts.length,
@@ -555,6 +609,12 @@ function admin(g, p) {
   if (op === 'recordPayment') return recordPayment(g, p);
   if (op === 'payments') return listPayments(p.guide);
   if (op === 'resendPaymentEmail') return resendPaymentEmail(g, p);
+  if (op === 'resolveMismatch') return resolveMismatch(g, p);
+  if (op === 'applyFeedChange') return applyFeedChange(g, p);
+  if (op === 'decideEvent') return decideEvent(g, p);
+  if (op === 'fetchRequests') return tableRows(ensureTab(TAB.fetch, FETCH_HDR)).filter(function (r) { return p.all || r['Status'] === 'open'; });
+  if (op === 'markFetch') return markFetch(p);
+  if (op === 'correctTour') return correctTour(g, p);
   if (op === 'setupPayments') return setupPayments(p);
   if (op === 'crmQueue') return crmQueue(p);
   if (op === 'crmMark') return crmMark(p);
@@ -598,10 +658,206 @@ function toursForMonth(month) {
     var d = v[i][CD.date - 1]; if (!(d instanceof Date)) continue; if (Utilities.formatDate(d, TZ, 'yyyy-MM') !== month) continue;
     out.push({ recordId: v[i][CD.id - 1], date: ymd(d), bookingId: String(v[i][CD.bookingId - 1]), division: v[i][CD.division - 1], tour: v[i][CD.tour - 1], guide: v[i][CD.guide - 1], guide2: v[i][CD.guide2 - 1], trainee: v[i][CD.trainee - 1],
       clients: v[i][CD.clients - 1], adults: v[i][CD.adults - 1], kids: v[i][CD.kids - 1], pets: v[i][CD.pets - 1], start: timeStr(v[i][CD.start - 1], 'HH:mm'), finish: timeStr(v[i][CD.finish - 1], 'HH:mm'), hours: v[i][CD.actualHrs - 1], otYN: v[i][CD.otYN - 1], otAmt: v[i][CD.otAmt - 1],
-      revenue: v[i][CD.revenue - 1], tip: v[i][CD.tip - 1], tipMethod: v[i][CD.tipMethod - 1], tourDetails: v[i][CD.tourDetails - 1], customerDetails: v[i][CD.custDetails - 1], expenses: v[i][CD.expItem - 1], totalExp: v[i][CD.totalExp - 1], net: v[i][CD.net - 1], fotaflo: v[i][CD.fotaflo - 1], submittedBy: v[i][CD.submittedBy - 1], subId: v[i][CD.subId - 1] });
+      revenue: v[i][CD.revenue - 1], tip: v[i][CD.tip - 1], tipMethod: v[i][CD.tipMethod - 1], builtIn: num(v[i][CD.builtIn - 1]), cardGrat: num(v[i][CD.cardGrat - 1]), fhPaid: num(v[i][CD.fhPaid - 1]), tourDetails: v[i][CD.tourDetails - 1], customerDetails: v[i][CD.custDetails - 1], expenses: v[i][CD.expItem - 1], totalExp: v[i][CD.totalExp - 1], net: v[i][CD.net - 1], fotaflo: v[i][CD.fotaflo - 1], submittedBy: v[i][CD.submittedBy - 1], subId: v[i][CD.subId - 1] });
   }
   return { month: month, tours: out.reverse(), sheetUrl: ss().getUrl() + '#gid=' + sh(TAB.cd).getSheetId() };
 }
+
+// ---------------------------------------------------------------- corrections, events, drafts, fetch requests (v11)
+TAB.fetch = 'Fetch Requests'; TAB.drafts = 'Drafts';
+var FETCH_HDR = ['Request ID', 'Requested At', 'Guide', 'Booking ID', 'Note', 'Status', 'Resolved At', 'Result'];
+var DRAFT_HDR = ['Draft ID', 'Saved At', 'Guide', 'Booking IDs', 'Payload'];
+function ensureTab(name, hdr) { var s = ss().getSheetByName(name); if (!s) { s = ss().insertSheet(name); s.appendRow(hdr); s.setFrozenRows(1); } return s; }
+function parseNote(n) { try { var o = JSON.parse(n); return (o && typeof o === 'object') ? o : { msg: String(n || '') }; } catch (e) { return { msg: String(n || '') }; } }
+function findAlert(alertId) {
+  var s = sh(TAB.alerts); var v = s.getDataRange().getValues();
+  for (var i = 1; i < v.length; i++) if (String(v[i][0]) === String(alertId)) return { sheet: s, row: i + 1, id: v[i][0], type: String(v[i][2]), bookingId: String(v[i][3]), guide: String(v[i][4]), customer: String(v[i][5]), hours: v[i][6], amount: num(v[i][7]), status: String(v[i][8]), recordId: String(v[i][10] || ''), note: parseNote(v[i][11]) };
+  throw new Error('Alert not found');
+}
+function setAlertStatus(a, status, extraNote) {
+  a.sheet.getRange(a.row, 9).setValue(status); a.sheet.getRange(a.row, 10).setValue(iso(now()));
+  if (extraNote) { var n = a.note || {}; n.decision = extraNote; a.sheet.getRange(a.row, 12).setValue(JSON.stringify(n)); }
+}
+function subIdForRecord(recordId) {
+  var cd = sh(TAB.cd).getDataRange().getValues(); var first = String(recordId || '').split(',')[0].trim();
+  for (var i = 1; i < cd.length; i++) if (String(cd[i][CD.id - 1]) === first) return { subId: String(cd[i][CD.subId - 1]), row: cd[i] };
+  throw new Error('Tour record ' + first + ' not found (it may have been edited since)');
+}
+function payloadForSub(subId) {
+  var r = tableRows(sh(TAB.subs)).filter(function (x) { return String(x['Submission ID']) === subId; })[0];
+  if (!r) throw new Error('Submission ' + subId + ' not found');
+  var P; try { P = JSON.parse(r['Payload']); } catch (e) { throw new Error('Submission payload unreadable'); }
+  return { P: P, guide: String(r['Guide']), status: String(r['Status'] || 'active') };
+}
+function payrollSnapshot(subId) {
+  var out = {}; guides().forEach(function (gd) { var s = ss().getSheetByName(gd.name + ' Hours'); if (!s) return; var v = s.getDataRange().getValues();
+    for (var j = 1; j < v.length; j++) if (String(v[j][PR.source - 1]).indexOf(subId) >= 0) out[gd.name] = { pay: num(v[j][PR.pay - 1]), cash: num(v[j][PR.cash - 1]), pickup: num(v[j][PR.pickup - 1]), charged: num(v[j][PR.chargedAmt - 1]), direct: num(v[j][PR.directAmt - 1]), totalDue: num(v[j][PR.totalDue - 1]) }; });
+  return out;
+}
+/** Re-run a submission through the math with Jim's changes applied, keep alert decisions that were already made, and tell the guide what changed. */
+function correctSubmission(subId, mutate, reason, emailGuide) {
+  var ps = payloadForSub(subId); if (ps.status === 'archived') throw new Error('That tour was already edited; refresh and use the newest card');
+  var P = ps.P; mutate(P);
+  var before = payrollSnapshot(subId);
+  // remember decisions on alerts tied to this tour so a corrected tour does not re-ask (e.g. a card gratuity already charged)
+  var al = sh(TAB.alerts); var av = al.getDataRange().getValues(); var decided = {};
+  var oldRecordIds = []; var cd = sh(TAB.cd).getDataRange().getValues(); for (var i = 1; i < cd.length; i++) if (String(cd[i][CD.subId - 1]) === subId) oldRecordIds.push(String(cd[i][CD.id - 1]));
+  for (var k = 1; k < av.length; k++) { var rid = String(av[k][10] || ''); if (oldRecordIds.some(function (id) { return rid.indexOf(id) >= 0; }) && String(av[k][8]) !== 'open') decided[String(av[k][2]) + '|' + String(av[k][3])] = String(av[k][8]); }
+  var res = archiveAndResubmit({ name: 'Jim' }, subId, P);
+  // archive rows say "Edited by guide"; relabel the ones we just wrote
+  var arc = sh(TAB.archive); var arv = arc.getDataRange().getValues(); for (var m = arv.length - 1; m >= 1 && m >= arv.length - 12; m--) if (String(arv[m][4]) === 'Edited by guide' && String(arv[m][1]) === 'Jim') arc.getRange(m + 1, 5).setValue('Corrected by Jim: ' + reason);
+  av = al.getDataRange().getValues();
+  for (var n = 1; n < av.length; n++) { if (String(av[n][8]) !== 'open') continue; var key = String(av[n][2]) + '|' + String(av[n][3]); var ridn = String(av[n][10] || '');
+    if (decided[key] && res.recordIds.some(function (id) { return ridn.indexOf(id) >= 0; })) { al.getRange(n + 1, 9).setValue(decided[key]); al.getRange(n + 1, 10).setValue(iso(now())); } }
+  var after = payrollSnapshot(res.submissionId);
+  var changes = [];
+  Object.keys(after).forEach(function (name) { var a = after[name], b = before[name] || { pay: 0, cash: 0, pickup: 0, charged: 0, direct: 0, totalDue: 0 };
+    if (Math.abs(a.totalDue - b.totalDue) > 0.004 || Math.abs(a.charged - b.charged) > 0.004) changes.push({ guide: name, before: b, after: a }); });
+  if (emailGuide !== false) changes.forEach(function (c) { try { sendCorrectionEmail(c.guide, P, reason, c.before, c.after); } catch (e) { } });
+  return { submissionId: res.submissionId, recordIds: res.recordIds, changes: changes };
+}
+function guideByName(name) { return guides().filter(function (x) { return x.name === name; })[0] || null; }
+function notifyGuide(name, subject, html) {
+  var g = guideByName(name); if (!g || !g.email) return false;
+  MailApp.sendEmail({ to: g.email, subject: subject, htmlBody: html, name: 'Jim Reich - Sedona Wine Tours' }); return true;
+}
+function sendCorrectionEmail(name, P, reason, before, after) {
+  var esc = function (x) { return String(x == null ? '' : x).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
+  var b0 = P.bookings[0] || {}; var when = b0.date ? Utilities.formatDate(new Date(b0.date + 'T12:00:00'), TZ, 'EEE, MMM d, yyyy') : '';
+  var row = function (l, x, y) { return '<tr><td>' + l + '</td><td style="text-align:right">' + money(x) + '</td><td style="text-align:right">' + money(y) + '</td><td style="text-align:right">' + (y - x >= 0 ? '+' : '') + money(y - x) + '</td></tr>'; };
+  var s = ss().getSheetByName(name + ' Hours'); var owed = s ? lastOwed(s) : 0;
+  var html = '<div style="font-family:Arial,sans-serif;font-size:14px;color:#222"><p>Hi ' + esc(name) + ',</p>' +
+    '<p>I reviewed your tour on <b>' + esc(when) + '</b> (' + esc(P.bookings.map(function (b) { return (b.tour || '') + (b.bookingId ? ' #' + b.bookingId : ''); }).join(', ')) + ') and made a correction.</p>' +
+    '<p><b>What changed and why:</b> ' + esc(reason) + '</p>' +
+    '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;border-color:#ddd;font-size:13px"><tr style="background:#f3f3f3"><th>Line</th><th>Before</th><th>After</th><th>Change</th></tr>' +
+    row('Guide pay', before.pay, after.pay) + row('Cash reimbursed', before.cash, after.cash) + row('Pickup', before.pickup, after.pickup) + row('Charged tips (built-in / card)', before.charged, after.charged) + row('<b>Total due for this tour</b>', before.totalDue, after.totalDue) + '</table>' +
+    '<p>Your running balance is now <b>' + money(owed) + '</b>' + (owed < 0 ? ' (a credit: I have paid ahead)' : '') + '.</p>' +
+    '<p>Questions? Reply to this email or call (928) 504-2445.</p><p>Thanks,<br>Jim<br>Sedona Wine Tours</p></div>';
+  return notifyGuide(name, 'Tour correction: ' + when + ' - ' + (after.totalDue - before.totalDue >= 0 ? '+' : '') + money(after.totalDue - before.totalDue), html);
+}
+/** Mismatch card: approve = guide's figure, reject = system's figure, set = the FareHarbor amount Jim typed. */
+function resolveMismatch(g, p) {
+  if (g.name !== 'Jim') throw new Error('Admin only');
+  var a = findAlert(p.alertId); if (a.status !== 'open') throw new Error('That card was already handled');
+  var action = String(p.action || ''); var n = a.note || {};
+  var target = action === 'approve' ? num(n.guide) : action === 'reject' ? num(n.system !== undefined ? n.system : a.amount) : action === 'set' ? round2(num(p.amount)) : null;
+  if (target === null) throw new Error('action must be approve, reject or set');
+  if (action === 'approve' && !num(n.guide)) throw new Error('The guide did not enter a built-in amount, so there is nothing to approve; use Set');
+  if (action === 'set' && !(target >= 0)) throw new Error('Enter the built-in gratuity amount');
+  var current = num(n.system !== undefined ? n.system : a.amount);
+  var bookingId = a.bookingId; var why = action === 'approve' ? 'I accepted the built-in gratuity you entered (' + money(target) + ') in place of the system figure (' + money(current) + ').'
+    : action === 'reject' ? 'I kept the system built-in gratuity of ' + money(current) + ' (the booking total already includes the 18%).'
+    : 'I set the built-in gratuity to FareHarbor\'s figure of ' + money(target) + ' (the system had used ' + money(current) + ').';
+  var out = { alertId: a.id, action: action, amount: target, changed: false };
+  if (Math.abs(target - current) > 0.004) {
+    var sub = subIdForRecord(a.recordId);
+    var r = correctSubmission(sub.subId, function (P) { P.bookings.forEach(function (b) { if (String(b.bookingId) === bookingId) b.adminBuiltIn = target; }); }, why, true);
+    out.changed = true; out.result = r;
+    a = findAlert(a.id); // row may have moved
+  } else {
+    // nothing to change: still tell the guide their entry was reviewed
+    try { var ps = payloadForSub(subIdForRecord(a.recordId).subId); notifyGuide(a.guide, 'Built-in gratuity confirmed - booking #' + bookingId, '<p>Hi ' + a.guide + ',</p><p>' + why + ' No change to your payroll.</p><p>Thanks,<br>Jim</p>'); } catch (e) { }
+  }
+  setAlertStatus(a, action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'set', { action: action, amount: target, at: iso(now()) });
+  return out;
+}
+/** Feed-change card: approve = re-run the tour with FareHarbor's current numbers; dismiss = keep what the guide recorded. */
+function applyFeedChange(g, p) {
+  if (g.name !== 'Jim') throw new Error('Admin only');
+  var a = findAlert(p.alertId); if (a.status !== 'open') throw new Error('That card was already handled');
+  var n = a.note || {}; var out = { alertId: a.id, action: p.action };
+  if (p.action === 'approve') {
+    var sub = subIdForRecord(a.recordId);
+    var why = 'FareHarbor sent this booking' + (n.newPaid != null ? ' with an amount paid of ' + money(n.newPaid) + (n.oldPaid != null ? ' (we had ' + money(n.oldPaid) + ')' : '') : '') + (n.newBuiltIn != null ? ' and a built-in gratuity of ' + money(n.newBuiltIn) + (n.oldBuiltIn != null ? ' (we had ' + money(n.oldBuiltIn) + ')' : '') : '') + ', so I re-ran the tour with FareHarbor\'s numbers.';
+    out.result = correctSubmission(sub.subId, function (P) { P.bookings.forEach(function (b) { if (String(b.bookingId) === a.bookingId) { b.manual = false; delete b.adminBuiltIn; if (p.builtIn !== undefined && p.builtIn !== '') b.adminBuiltIn = round2(num(p.builtIn)); else if (n.newBuiltIn != null && num(n.newBuiltIn) > 0) b.adminBuiltIn = round2(num(n.newBuiltIn)); } }); }, why, true);
+    a = findAlert(a.id); setAlertStatus(a, 'approved', { at: iso(now()) });
+  } else { setAlertStatus(a, 'dismissed', { at: iso(now()) }); }
+  return out;
+}
+/** Jim corrects a recorded tour directly (amount paid / built-in / card gratuity) - used for one-off fixes. */
+function correctTour(g, p) {
+  if (g.name !== 'Jim') throw new Error('Admin only');
+  var sub = subIdForRecord(p.recordId); var bookingId = String(p.bookingId || sub.row[CD.bookingId - 1]);
+  return correctSubmission(sub.subId, function (P) { P.bookings.forEach(function (b) { if (String(b.bookingId) !== bookingId) return;
+    if (p.amountPaid !== undefined) { b.amountPaid = round2(num(p.amountPaid)); b.manual = false; }
+    if (p.builtIn !== undefined) b.adminBuiltIn = round2(num(p.builtIn));
+    if (p.cardGrat !== undefined) { b.tips = (b.tips || []).filter(function (t) { return t.method !== "Bill Customer's Card"; }); if (num(p.cardGrat) > 0) b.tips.push({ method: "Bill Customer's Card", amount: round2(num(p.cardGrat)) }); } }); },
+    String(p.reason || 'Corrected to match FareHarbor'), p.email !== false);
+}
+// ---- trainings & meetings: paid hours with no booking; approved by Jim before they reach payroll
+function submitEvent(g, e) {
+  var who = String(e.guide || g.name).trim(); if (who !== g.name && g.name !== 'Jim') throw new Error('You can only record your own hours');
+  var gd = guideByName(who); if (!gd || !/active/i.test(gd.status)) throw new Error('Unknown guide'); if (who === 'Jim') throw new Error('Jim has no payroll');
+  var m = String(e.date || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); if (!m) throw new Error('Enter the date');
+  var title = String(e.event || '').trim().slice(0, 120); if (!title) throw new Error('Describe the event (e.g. Ride-along training with Jim)');
+  var toMin = function (t) { var x = String(t || '').match(/^(\d{1,2}):(\d{2})/); return x ? Number(x[1]) * 60 + Number(x[2]) : null; };
+  var st = toMin(e.start), fin = toMin(e.end); if (st === null || fin === null) throw new Error('Enter start and end times'); if (fin <= st) throw new Error('End must be after start');
+  var hours = roundQuarter((fin - st) / 60); if (hours > 16) throw new Error('That is more than 16 hours');
+  var pay = round2(hours * num(gd.rate));
+  var id = addAlert('event', 'EVENT', who, title, hours, pay, '', JSON.stringify({ msg: 'Training / meeting hours awaiting approval', event: title, date: e.date, start: e.start, end: e.end, rate: num(gd.rate), by: g.name }));
+  return { alertId: id, guide: who, date: e.date, event: title, hours: hours, pay: pay, status: 'awaiting approval' };
+}
+function decideEvent(g, p) {
+  if (g.name !== 'Jim') throw new Error('Admin only');
+  var a = findAlert(p.alertId); if (a.type !== 'event') throw new Error('Not an event card'); if (a.status !== 'open') throw new Error('That card was already handled');
+  var n = a.note || {}; var when = Utilities.formatDate(new Date(String(n.date) + 'T12:00:00'), TZ, 'EEE, MMM d, yyyy');
+  if (p.action === 'approve') {
+    var s = ss().getSheetByName(a.guide + ' Hours'); if (!s) { s = ss().insertSheet(a.guide + ' Hours'); s.appendRow(payrollHeader()); }
+    var hours = num(a.hours), pay = round2(hours * num(n.rate)); var owed = round2(lastOwed(s) + pay);
+    var row = []; for (var i = 0; i < PR.source; i++) row.push('');
+    row[PR.date - 1] = new Date(String(n.date) + 'T12:00:00'); row[PR.bookingId - 1] = 'EVENT'; row[PR.tour - 1] = n.event || a.customer; row[PR.clients - 1] = (n.start || '') + '-' + (n.end || '');
+    row[PR.hours - 1] = hours; row[PR.pay - 1] = pay; row[PR.totalDue - 1] = pay; row[PR.owed - 1] = owed; row[PR.rate - 1] = num(n.rate); row[PR.recordId - 1] = a.id; row[PR.source - 1] = 'Guide Form ' + a.id + ' | event approved by Jim ' + iso(now());
+    s.appendRow(row); var rn = s.getLastRow(); s.getRange(rn, PR.date).setNumberFormat('EEEE, MMMM d, yyyy'); recalcOwed(s);
+    setAlertStatus(a, 'approved', { at: iso(now()) });
+    notifyGuide(a.guide, 'Approved: ' + (n.event || 'training') + ' on ' + when + ' - ' + money(pay), '<p>Hi ' + a.guide + ',</p><p>I approved your hours for <b>' + (n.event || 'training') + '</b> on ' + when + ' (' + (n.start || '') + '-' + (n.end || '') + ', ' + hours + ' h at $' + num(n.rate) + '/hr = <b>' + money(pay) + '</b>). It is on your payroll sheet; your running balance is now <b>' + money(lastOwed(s)) + '</b>.</p><p>Thanks,<br>Jim</p>');
+    return { alertId: a.id, approved: true, pay: pay, owed: lastOwed(s) };
+  }
+  setAlertStatus(a, 'rejected', { at: iso(now()), reason: String(p.reason || '') });
+  notifyGuide(a.guide, 'Not approved: ' + (n.event || 'training') + ' on ' + when, '<p>Hi ' + a.guide + ',</p><p>I did not approve the hours you entered for <b>' + (n.event || 'training') + '</b> on ' + when + ' (' + (n.start || '') + '-' + (n.end || '') + ').' + (p.reason ? ' Reason: ' + String(p.reason) : '') + ' Nothing was added to your payroll; call me if you think this is a mistake.</p><p>Thanks,<br>Jim</p>');
+  return { alertId: a.id, approved: false };
+}
+// ---- drafts: a guide can park a form while a booking is still on its way from FareHarbor
+function saveDraft(g, payload, draftId) {
+  var s = ensureTab(TAB.drafts, DRAFT_HDR); var v = s.getDataRange().getValues(); var ids = (payload && payload.bookings || []).map(function (b) { return b.bookingId || ''; }).join(', ');
+  for (var i = 1; i < v.length; i++) if (draftId && String(v[i][0]) === String(draftId)) { if (String(v[i][2]) !== g.name && g.name !== 'Jim') throw new Error('Not your draft'); s.getRange(i + 1, 2, 1, 4).setValues([[iso(now()), g.name, ids, JSON.stringify(payload)]]); return { draftId: draftId }; }
+  var id = uid('D'); s.appendRow([id, iso(now()), g.name, ids, JSON.stringify(payload)]); return { draftId: id };
+}
+function myDrafts(g) { return tableRows(ensureTab(TAB.drafts, DRAFT_HDR)).filter(function (r) { return String(r['Guide']) === g.name; }).map(function (r) { var P = {}; try { P = JSON.parse(r['Payload']); } catch (e) { } return { draftId: r['Draft ID'], savedAt: r['Saved At'], bookingIds: r['Booking IDs'], payload: P }; }); }
+function deleteDraft(g, draftId) { var s = ensureTab(TAB.drafts, DRAFT_HDR); var v = s.getDataRange().getValues(); for (var i = v.length - 1; i >= 1; i--) if (String(v[i][0]) === String(draftId) && (String(v[i][2]) === g.name || g.name === 'Jim')) { s.deleteRow(i + 1); return { deleted: true }; } return { deleted: false }; }
+// ---- fetch requests: "my booking isn't listed" - the hourly sync (or Jim's Refresh) re-reads FareHarbor and settles these
+function requestFetch(g, p) {
+  var s = ensureTab(TAB.fetch, FETCH_HDR); var bid = String(p.bookingId || '').replace(/\D/g, '');
+  if (bid) { var f = tableRows(sh(TAB.fh)).filter(function (r) { return String(r['Booking ID']) === bid; })[0]; if (f) return { requestId: '', status: 'found', bookingId: bid }; }
+  var id = uid('F'); s.appendRow([id, iso(now()), g.name, bid, String(p.note || '').slice(0, 300), 'open', '', '']);
+  return { requestId: id, status: 'open', bookingId: bid };
+}
+function fetchStatus(g, requestId) {
+  var r = tableRows(ensureTab(TAB.fetch, FETCH_HDR)).filter(function (x) { return String(x['Request ID']) === String(requestId); })[0];
+  if (!r) throw new Error('Request not found');
+  var out = { requestId: requestId, status: r['Status'], bookingId: String(r['Booking ID'] || ''), result: r['Result'] || '' };
+  if (out.bookingId) { var f = tableRows(sh(TAB.fh)).filter(function (x) { return String(x['Booking ID']) === out.bookingId; })[0]; if (f) out.status = 'found'; }
+  return out;
+}
+/** After FareHarbor data lands: close requests whose booking is now here (email the guide), flag Jim when one has waited too long. */
+function settleFetchRequests() {
+  var s = ss().getSheetByName(TAB.fetch); if (!s) return; var v = s.getDataRange().getValues(); if (v.length < 2) return;
+  var fh = {}; tableRows(sh(TAB.fh)).forEach(function (r) { fh[String(r['Booking ID'])] = r; });
+  for (var i = 1; i < v.length; i++) {
+    if (String(v[i][5]) !== 'open') continue; var bid = String(v[i][3] || ''); var guide = String(v[i][2]); var ageMin = (now().getTime() - new Date(String(v[i][1])).getTime()) / 60000;
+    if (bid && fh[bid]) {
+      s.getRange(i + 1, 6, 1, 3).setValues([['found', iso(now()), 'Booking arrived from FareHarbor']]);
+      try { notifyGuide(guide, 'Your booking #' + bid + ' is ready on the tour form', '<p>Hi ' + guide + ',</p><p>FareHarbor booking <b>#' + bid + '</b> (' + fh[bid]['Item / Tour'] + ', ' + fh[bid]['Customer Name'] + ') has arrived. Open <a href="https://sedonawinetours.group/guide/">the tour form</a>, pick it from the list, and finish your tour record (your draft is saved there).</p><p>Thanks,<br>Jim</p>'); } catch (e) { }
+    } else if (ageMin > 20 && !openAlertKeys('booking-missing')[bid || guide]) {
+      addAlert('booking-missing', bid || guide, guide, '', '', 0, v[i][0], JSON.stringify({ msg: 'A guide asked for a booking that FareHarbor has not sent', bookingId: bid, note: String(v[i][4] || ''), requestedAt: String(v[i][1]) }));
+    }
+  }
+}
+function markFetch(p) {
+  var s = ensureTab(TAB.fetch, FETCH_HDR); var v = s.getDataRange().getValues();
+  for (var i = 1; i < v.length; i++) if (String(v[i][0]) === String(p.requestId)) { s.getRange(i + 1, 6, 1, 3).setValues([[p.status || 'closed', iso(now()), String(p.result || '')]]); return { ok: true }; }
+  throw new Error('Request not found');
+}
+
 // ---------------------------------------------------------------- payments (Jim only)
 var PAYMENT_METHODS = ['Zelle', 'Venmo', 'Cash', 'Check', 'PayPal', 'Direct deposit'];
 var PAY_BG = '#d9ead3'; // light green 3
